@@ -80,6 +80,7 @@ class level():
             del self.enemies[collision]
             self.player.hp -= 1
 
+
 class Player():
     def __init__(self, x, y, width, height, speed, att_speed, hp):
         self.x = x
