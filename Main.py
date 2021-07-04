@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
@@ -17,6 +18,7 @@ class level():
         self.fps = 60
         self.enemies = []
         self.bullets = []
+        self.targets = []
 
     def draw_game(self):
         self.window.fill(WHITE)
@@ -46,9 +48,17 @@ class level():
             if event.type == pygame.USEREVENT + 1:
                 enemy = Enemy(self)
                 self.enemies.append(enemy)
-            if event.type == pygame.USEREVENT + 2:
-                bullet = Bullet(self.player.x + (self.player.width//2), self.player.y + (self.player.height//2), 10, 4, 5)
-                self.bullets.append(bullet)
+            if event.type == pygame.USEREVENT + 2: #create bullet
+                for enemy in self.enemies: #find closest enemy
+                    self.targets.append(math.sqrt((abs((enemy.x + enemy.width//2)- (self.player.x + self.player.width//2))**2) + (abs((enemy.y + enemy.height//2)- (self.player.y + self.player.height//2))**2)))
+                print(self.targets)
+                if self.targets:
+                    closest_enemy_index = self.targets.index(min(self.targets))
+                    target = self.enemies[closest_enemy_index]
+                    bullet = Bullet(self.player.x + (self.player.width//2), self.player.y + (self.player.height//2), 10, 4, 5, target)
+                    self.bullets.append(bullet)
+                self.targets = []
+
 
 class Player():
     def __init__(self, width, height, speed, att_speed):
@@ -71,13 +81,13 @@ class Player():
 
 
 class Bullet():
-    def __init__(self, x, y, width, height, speed):
+    def __init__(self, x, y, width, height, speed, target):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.speed = speed
-        self.target = (20,20)
+        self.target = target
 
 
 class Enemy():
