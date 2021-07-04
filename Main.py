@@ -1,8 +1,8 @@
+import pygame
 import random
 
-import pygame
-
 BLACK = (0,0,0)
+WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
 run = True
@@ -17,7 +17,7 @@ class level():
         self.enemies = []
 
     def draw_game(self):
-        self.window.fill((255, 255, 255))
+        self.window.fill(WHITE)
         pygame.draw.rect(self.window, BLACK, (self.player.x, self.player.y, self.player.width, self.player.height))
         for enemy in self.enemies:
             pygame.draw.rect(self.window, RED, enemy)
@@ -42,7 +42,6 @@ class level():
                 self.enemies.append(enemy.pos)
 
 
-
 class Player():
     def __init__(self, width, height, speed):
         self.x = 400
@@ -62,7 +61,6 @@ class Player():
             self.y += self.speed
 
 
-
 class Enemy():
     def __init__(self, level):
         self.x = random.randint(0, level.width)
@@ -71,6 +69,7 @@ class Enemy():
         self.height = 20
         self.velocity = 5
         self.pos = pygame.Rect(self.x, self.y, self.width, self.height)
+
 
 def main():
     pygame.init()
@@ -84,7 +83,6 @@ def main():
         level_1.draw_game()
         keys_pressed = pygame.key.get_pressed()
         player.move(keys_pressed, level_1)
-
 
     pygame.quit()
 
