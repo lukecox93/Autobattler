@@ -46,18 +46,23 @@ class level():
                 if event.key == pygame.K_ESCAPE:
                     run = False
             if event.type == pygame.USEREVENT + 1:
-                enemy = Enemy(self)
+                enemy = Enemy(random.randint(0, self.width), random.randint(0, self.height))
                 self.enemies.append(enemy)
             if event.type == pygame.USEREVENT + 2: #create bullet
-                for enemy in self.enemies: #find closest enemy
-                    self.targets.append(math.sqrt((abs((enemy.x + enemy.width//2)- (self.player.x + self.player.width//2))**2) + (abs((enemy.y + enemy.height//2)- (self.player.y + self.player.height//2))**2)))
-                print(self.targets)
-                if self.targets:
-                    closest_enemy_index = self.targets.index(min(self.targets))
-                    target = self.enemies[closest_enemy_index]
-                    bullet = Bullet(self.player.x + (self.player.width//2), self.player.y + (self.player.height//2), 10, 4, 5, target)
-                    self.bullets.append(bullet)
-                self.targets = []
+                self.target_finder()
+
+    def target_finder(self):
+        for enemy in self.enemies:  # find closest enemy
+            self.targets.append(math.sqrt(
+                (abs((enemy.x + enemy.width // 2) - (self.player.x + self.player.width // 2)) ** 2) + (
+                            abs((enemy.y + enemy.height // 2) - (self.player.y + self.player.height // 2)) ** 2)))
+        if self.targets:
+            closest_enemy_index = self.targets.index(min(self.targets))
+            target = self.enemies[closest_enemy_index]
+            bullet = Bullet(self.player.x + (self.player.width // 2), self.player.y + (self.player.height // 2), 10, 4,
+                            5, target)
+            self.bullets.append(bullet)
+        self.targets = []
 
 
 class Player():
@@ -91,9 +96,9 @@ class Bullet():
 
 
 class Enemy():
-    def __init__(self, level):
-        self.x = random.randint(0, level.width)
-        self.y = random.randint(0, level.height)
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
         self.width = 20
         self.height = 20
         self.velocity = 5
