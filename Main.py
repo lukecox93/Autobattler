@@ -23,11 +23,11 @@ class level():
     def draw_game(self):
         self.window.fill(WHITE)
         for enemy in self.enemies:
-            pygame.draw.rect(self.window, RED, (enemy.x, enemy.y, enemy.width, enemy.height))
+            pygame.draw.rect(self.window, RED, (enemy.rect))
         for bullet in self.bullets:
-            pygame.draw.rect(self.window, BLUE, (bullet.x, bullet.y, bullet.width, bullet.height))
-            bullet.x += bullet.speed
-        pygame.draw.rect(self.window, BLACK, (self.player.x, self.player.y, self.player.width, self.player.height))
+            pygame.draw.rect(self.window, BLUE, (bullet.rect))
+            pygame.Rect.move_ip(bullet.rect, bullet.speed, 0)
+        pygame.draw.rect(self.window, BLACK, (self.player.rect))
         pygame.display.update()
 
     def events(self,player):
@@ -54,35 +54,51 @@ class level():
     def target_finder(self):
         for enemy in self.enemies:  # find closest enemy
             self.targets.append(math.sqrt(
-                (abs((enemy.x + enemy.width // 2) - (self.player.x + self.player.width // 2)) ** 2) + (
-                            abs((enemy.y + enemy.height // 2) - (self.player.y + self.player.height // 2)) ** 2)))
+                (abs((enemy.rect[0] + enemy.rect[2] // 2) - (self.player.rect[0] + self.player.rect[2] // 2)) ** 2) + (
+                            abs((enemy.rect[1] + enemy.rect[3] // 2) - (self.player.rect[1] + self.player.rect[3] // 2)) ** 2)))
         if self.targets:
             closest_enemy_index = self.targets.index(min(self.targets))
             target = self.enemies[closest_enemy_index]
-            bullet = Bullet(self.player.x + (self.player.width // 2), self.player.y + (self.player.height // 2), 10, 4,
+            bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3] // 2), 10, 4,
                             5, target)
             self.bullets.append(bullet)
         self.targets = []
 
+    def bullet_collision(self):
+        for bullet in self.bullets:
+            collision = pygame.Rect.collidelist(bullet.rect, self.enemies)
+            if collision >= 0:
+                del self.enemies[collision]
+                self.bullets.remove(bullet)
+            elif bullet.x > self.width or bullet.x < 0 or bullet.y > self.height or bullet.y < 0:
+                self.bullets.remove(bullet)
+
+    def player_collision(self):
+        collision = pygame.Rect.collidelist(self.player.rect, self.enemies)
+        if collision >= 0:
+            del self.enemies[collision]
+            self.player.hp -= 1
 
 class Player():
-    def __init__(self, width, height, speed, att_speed):
-        self.x = 400
-        self.y = 200
+    def __init__(self, x, y, width, height, speed, att_speed):
+        self.x = x
+        self.y = y
         self.width = width
         self.height = height
         self.speed = speed
         self.att_speed = att_speed
+        self.rect = pygame.Rect(x, y, width, height)
+        self.hp = 1
 
     def move(self, keys_pressed, level):
-        if keys_pressed[pygame.K_a] and self.x - self.speed > 0:
-            self.x -= self.speed
-        if keys_pressed[pygame.K_d] and self.x + self.speed + self.width < level.width:
-            self.x += self.speed
-        if keys_pressed[pygame.K_w] and self.y - self.speed > 0:
-            self.y -= self.speed
-        if keys_pressed[pygame.K_s] and self.y + self.speed + self.height < level.height:
-            self.y += self.speed
+        if keys_pressed[pygame.K_a] and self.rect[0] - self.speed > 0:
+            pygame.Rect.move_ip(self.rect, -self.speed, 0)
+        if keys_pressed[pygame.K_d] and self.rect[0] + self.speed + self.rect[2] < level.width:
+            pygame.Rect.move_ip(self.rect, self.speed, 0)
+        if keys_pressed[pygame.K_w] and self.rect[1] - self.speed > 0:
+            pygame.Rect.move_ip(self.rect, 0, -self.speed)
+        if keys_pressed[pygame.K_s] and self.rect[1] + self.speed + self.rect[3] < level.height:
+            pygame.Rect.move_ip(self.rect, 0, self.speed)
 
 
 class Bullet():
@@ -93,6 +109,7 @@ class Bullet():
         self.height = height
         self.speed = speed
         self.target = target
+        self.rect = pygame.Rect(x, y, width, height)
 
 
 class Enemy():
@@ -102,13 +119,13 @@ class Enemy():
         self.width = 20
         self.height = 20
         self.velocity = 5
-        self.pos = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.rect = pygame.Rect(x, y, self.width, self.height)
 
 
 def main():
     pygame.init()
     clock = pygame.time.Clock()
-    player = Player(50, 50, 5, 5)
+    player = Player(400, 200, 50, 50, 5, 5)
     level_1 = level(player)
     level_1.events(player)
     while run:
@@ -117,6 +134,14 @@ def main():
         level_1.draw_game()
         keys_pressed = pygame.key.get_pressed()
         player.move(keys_pressed, level_1)
+        level_1.bullet_collision()
+        level_1.player_collision()
+        if player.hp <= 0:
+            print("game over")
+            level_1.window.fill(RED)
+            pygame.display.update()
+            pygame.time.wait(2000)
+            main()
 
     pygame.quit()
 
