@@ -50,7 +50,6 @@ class level():
                 bullet = Bullet(self.player.x + (self.player.width//2), self.player.y + (self.player.height//2), 10, 4, 5)
                 self.bullets.append(bullet)
 
-
 class Player():
     def __init__(self, width, height, speed, att_speed):
         self.x = 400
