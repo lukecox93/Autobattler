@@ -17,23 +17,20 @@ class level():
         self.fps = 60
         self.enemies = []
         self.bullets = []
-        self.bull = 10
 
     def draw_game(self):
         self.window.fill(WHITE)
-        pygame.draw.rect(self.window, BLACK, (self.player.x, self.player.y, self.player.width, self.player.height))
         for enemy in self.enemies:
-            pygame.draw.rect(self.window, RED, enemy)
+            pygame.draw.rect(self.window, RED, (enemy.x, enemy.y, enemy.width, enemy.height))
         for bullet in self.bullets:
-            pygame.draw.rect(self.window, BLUE, bullet)
-            bullet[0] += 10
+            pygame.draw.rect(self.window, BLUE, (bullet.x, bullet.y, bullet.width, bullet.height))
+            bullet.x += bullet.speed
+        pygame.draw.rect(self.window, BLACK, (self.player.x, self.player.y, self.player.width, self.player.height))
         pygame.display.update()
 
-    def init_enemies(self):
+    def events(self,player):
         self.enemy_type_1 = pygame.USEREVENT + 1
         pygame.time.set_timer(self.enemy_type_1, 1000)
-
-    def init_bullets(self, player):
         self.create_bullet = pygame.USEREVENT + 2
         pygame.time.set_timer(self.create_bullet, 1000//player.att_speed)
 
@@ -48,10 +45,10 @@ class level():
                     run = False
             if event.type == pygame.USEREVENT + 1:
                 enemy = Enemy(self)
-                self.enemies.append(enemy.pos)
+                self.enemies.append(enemy)
             if event.type == pygame.USEREVENT + 2:
-                bullet = Bullet(self.player.x + (self.player.width//2), self.player.y + (self.player.height//2))
-                self.bullets.append([bullet.x, bullet.y, bullet.width, bullet.height])
+                bullet = Bullet(self.player.x + (self.player.width//2), self.player.y + (self.player.height//2), 10, 4, 5)
+                self.bullets.append(bullet)
 
 
 class Player():
@@ -75,12 +72,12 @@ class Player():
 
 
 class Bullet():
-    def __init__(self, x, y):
+    def __init__(self, x, y, width, height, speed):
         self.x = x
         self.y = y
-        self.width = 4
-        self.height = 4
-        self.speed = 5
+        self.width = width
+        self.height = height
+        self.speed = speed
         self.target = (20,20)
 
 
@@ -99,8 +96,7 @@ def main():
     clock = pygame.time.Clock()
     player = Player(50, 50, 5, 5)
     level_1 = level(player)
-    level_1.init_enemies()
-    level_1.init_bullets(player)
+    level_1.events(player)
     while run:
         clock.tick(level_1.fps)
         level_1.event_handler()
