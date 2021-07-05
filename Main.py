@@ -126,7 +126,6 @@ class level():
             else:
                 self.enemies[collision].speed = -self.enemies[collision].speed*2
 
-
     def move_enemies(self):
         for enemy in self.enemies:
             if enemy.speed < 0:
