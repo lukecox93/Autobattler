@@ -8,10 +8,12 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
+pygame.display.set_caption("Autobattler")
+
 def main():
     pygame.init()
     clock = pygame.time.Clock()
-    player = Player(400, 200, 50, 50, 5, 4, 5)
+    player = Player(900, 500, 50, 50, 10, 4, 5)
     level_1 = Level(player)
     level_1.events(player)
     while level_1.run:
@@ -23,7 +25,6 @@ def main():
         level_1.bullet_collision()
         if level_1.player_collision():
             main()
-        level_1.move_enemies()
 
     pygame.quit()
 

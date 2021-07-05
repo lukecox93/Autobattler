@@ -4,6 +4,9 @@ import math
 import sys
 from Enemy import Enemy
 from Bullet import Bullet
+pygame.font.init()
+
+
 
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
@@ -11,13 +14,15 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
+HEALTH_FONT = pygame.font.SysFont("Verdana", 30)
+
 pygame.init()
 
 class Level():
     def __init__(self, player):
         self.player = player
-        self.width = 900
-        self.height = 500
+        self.width = 1800
+        self.height = 1000
         self.window = pygame.display.set_mode((self.width, self.height))
         self.fps = 60
         self.enemies = []
@@ -27,8 +32,12 @@ class Level():
 
     def draw_game(self):
         self.window.fill(WHITE)
+        health_text = HEALTH_FONT.render("HP: " + str(self.player.hp), True, BLACK)
+        self.window.blit(health_text, (self.width - health_text.get_width() - 10, 10))
         for enemy in self.enemies:
             pygame.draw.rect(self.window, RED, (enemy.rect))
+            self.targeting(enemy)
+            pygame.Rect.move_ip(enemy.rect, enemy.delta_x, enemy.delta_y)
         for bullet in self.bullets:
             pygame.draw.rect(self.window, BLUE, (bullet.rect))
             pygame.Rect.move_ip(bullet.rect, bullet.delta_x, bullet.delta_y)
@@ -58,7 +67,7 @@ class Level():
                     self.run = False
                     sys.exit()
             if event.type == pygame.USEREVENT + 1:
-                enemy = Enemy(random.randint(0, self.width), random.randint(0, self.height))
+                enemy = Enemy(random.randint(0, self.width), random.randint(0, self.height), self.player)
                 self.enemies.append(enemy)
             if event.type == pygame.USEREVENT + 2: #create bullet
                 self.target_finder()
@@ -74,11 +83,12 @@ class Level():
             closest_enemy_index = targets.index(min(targets))
             self.player.target = self.enemies[closest_enemy_index]
             bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3]
-                            // 2), 4, 4, 5, self.player.target, 1)
+                            // 2), 4, 4, 15, self.player.target, 1)
             self.bullets.append(bullet)
-            self.bullet_targeting(bullet)
+            self.targeting(bullet)
+            print(bullet.target)
 
-    def bullet_targeting(self, bullet):
+    def targeting(self, bullet):
         x_dist = (bullet.target.rect[0] - bullet.rect[0])
         y_dist = (bullet.target.rect[1] - bullet.rect[1])
         if x_dist == 0:
@@ -132,19 +142,3 @@ class Level():
                 self.enemies[collision].speed = -self.enemies[collision].speed*2
             return self.player.check_hp(self)
 
-    def move_enemies(self):
-        for enemy in self.enemies:
-            if enemy.speed < 0:
-                if enemy.bounce >= enemy.bounciness:
-                    enemy.speed = -enemy.speed//2
-                    enemy.bounce = 0
-                else:
-                    enemy.bounce += 1
-            if (enemy.rect[0] + enemy.rect[2]//2) < (self.player.rect[0] + self.player.rect[2]//2):
-                pygame.Rect.move_ip(enemy.rect, enemy.speed, 0)
-            elif (enemy.rect[0] + enemy.rect[2]//2) > (self.player.rect[0] + self.player.rect[2]//2):
-                pygame.Rect.move_ip(enemy.rect, -enemy.speed, 0)
-            if (enemy.rect[1] + enemy.rect[3]//2) < (self.player.rect[1] + self.player.rect[3]//2):
-                pygame.Rect.move_ip(enemy.rect, 0, enemy.speed)
-            elif (enemy.rect[1] + enemy.rect[3]//2) > (self.player.rect[1] + self.player.rect[3]//2):
-                pygame.Rect.move_ip(enemy.rect, 0, -enemy.speed)

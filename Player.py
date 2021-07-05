@@ -24,13 +24,13 @@ class Player():
         self.colour = BLACK
 
     def move(self, keys_pressed, level):
-        if keys_pressed[pygame.K_LEFT] and self.rect[0] - self.speed > 0:
+        if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed > 0:
             pygame.Rect.move_ip(self.rect, -self.speed, 0)
-        if keys_pressed[pygame.K_RIGHT] and self.rect[0] + self.speed + self.rect[2] < level.width:
+        if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and self.rect[0] + self.speed + self.rect[2] < level.width:
             pygame.Rect.move_ip(self.rect, self.speed, 0)
-        if keys_pressed[pygame.K_UP] and self.rect[1] - self.speed > 0:
+        if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and self.rect[1] - self.speed > 0:
             pygame.Rect.move_ip(self.rect, 0, -self.speed)
-        if keys_pressed[pygame.K_DOWN] and self.rect[1] + self.speed + self.rect[3] < level.height:
+        if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and self.rect[1] + self.speed + self.rect[3] < level.height:
             pygame.Rect.move_ip(self.rect, 0, self.speed)
 
     def check_hp(self, level):
