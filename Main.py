@@ -24,7 +24,10 @@ class level():
     def draw_game(self):
         self.window.fill(WHITE)
         for enemy in self.enemies:
-            pygame.draw.rect(self.window, RED, (enemy.rect))
+            if enemy == self.player.target:
+                pygame.draw.rect(self.window, GREEN, (enemy.rect))
+            else:
+                pygame.draw.rect(self.window, RED, (enemy.rect))
         for bullet in self.bullets:
             pygame.draw.rect(self.window, BLUE, (bullet.rect))
             pygame.Rect.move_ip(bullet.rect, bullet.speed, 0)
@@ -53,23 +56,26 @@ class level():
                 self.target_finder()
 
     def target_finder(self):
+        targets = []
         for enemy in self.enemies:  # find closest enemy
-            self.targets.append(math.sqrt(
+            targets.append(math.sqrt(
                 (abs((enemy.rect[0] + enemy.rect[2] // 2) - (self.player.rect[0] + self.player.rect[2] // 2)) ** 2) + (
-                            abs((enemy.rect[1] + enemy.rect[3] // 2) - (self.player.rect[1] + self.player.rect[3] // 2)) ** 2)))
-        if self.targets:
-            closest_enemy_index = self.targets.index(min(self.targets))
-            target = self.enemies[closest_enemy_index]
-            bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3] // 2), 10, 4,
-                            5, target)
+                            abs((enemy.rect[1] + enemy.rect[3] // 2) - (self.player.rect[1] + self.player.rect[3] // 2))
+                            ** 2)))
+        if targets:
+            closest_enemy_index = targets.index(min(targets))
+            self.player.target = self.enemies[closest_enemy_index]
+            bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3]
+                            // 2), 10, 4, 5, self.player.target, 1)
             self.bullets.append(bullet)
-        self.targets = []
 
     def bullet_collision(self):
         for bullet in self.bullets:
             collision = pygame.Rect.collidelist(bullet.rect, self.enemies)
             if collision >= 0:
-                del self.enemies[collision]
+                self.enemies[collision].hp -= bullet.damage
+                if self.enemies[collision].hp <= 0:
+                    del self.enemies[collision]
                 self.bullets.remove(bullet)
             elif bullet.x > self.width or bullet.x < 0 or bullet.y > self.height or bullet.y < 0:
                 self.bullets.remove(bullet)
@@ -77,11 +83,22 @@ class level():
     def player_collision(self):
         collision = pygame.Rect.collidelist(self.player.rect, self.enemies)
         if collision >= 0:
-            del self.enemies[collision]
-            self.player.hp -= 1
+            self.player.hp -= self.enemies[collision].damage
+            self.enemies[collision].hp -= self.player.body_damage
+            if self.enemies[collision].hp <= 0:
+                del self.enemies[collision]
+            else:
+                self.enemies[collision].speed = -self.enemies[collision].speed*2
+
 
     def move_enemies(self):
         for enemy in self.enemies:
+            if enemy.speed < 0:
+                if enemy.bounce >= enemy.bounciness:
+                    enemy.speed = -enemy.speed//2
+                    enemy.bounce = 0
+                else:
+                    enemy.bounce += 1
             if (enemy.rect[0] + enemy.rect[2]//2) < (self.player.rect[0] + self.player.rect[2]//2):
                 pygame.Rect.move_ip(enemy.rect, enemy.speed, 0)
             elif (enemy.rect[0] + enemy.rect[2]//2) > (self.player.rect[0] + self.player.rect[2]//2):
@@ -90,6 +107,10 @@ class level():
                 pygame.Rect.move_ip(enemy.rect, 0, enemy.speed)
             elif (enemy.rect[1] + enemy.rect[3]//2) > (self.player.rect[1] + self.player.rect[3]//2):
                 pygame.Rect.move_ip(enemy.rect, 0, -enemy.speed)
+
+    def bullet_targeting(self):
+        pass
+    #TODO
 
 
 class Player():
@@ -102,28 +123,30 @@ class Player():
         self.att_speed = att_speed
         self.rect = pygame.Rect(x, y, width, height)
         self.hp = hp
+        self.target = None
+        self.body_damage = 1
 
     def move(self, keys_pressed, level):
-        if keys_pressed[pygame.K_a] and self.rect[0] - self.speed > 0:
+        if keys_pressed[pygame.K_LEFT] and self.rect[0] - self.speed > 0:
             pygame.Rect.move_ip(self.rect, -self.speed, 0)
-        if keys_pressed[pygame.K_d] and self.rect[0] + self.speed + self.rect[2] < level.width:
+        if keys_pressed[pygame.K_RIGHT] and self.rect[0] + self.speed + self.rect[2] < level.width:
             pygame.Rect.move_ip(self.rect, self.speed, 0)
-        if keys_pressed[pygame.K_w] and self.rect[1] - self.speed > 0:
+        if keys_pressed[pygame.K_UP] and self.rect[1] - self.speed > 0:
             pygame.Rect.move_ip(self.rect, 0, -self.speed)
-        if keys_pressed[pygame.K_s] and self.rect[1] + self.speed + self.rect[3] < level.height:
+        if keys_pressed[pygame.K_DOWN] and self.rect[1] + self.speed + self.rect[3] < level.height:
             pygame.Rect.move_ip(self.rect, 0, self.speed)
 
 
 class Bullet():
-    def __init__(self, x, y, width, height, speed, target):
+    def __init__(self, x, y, width, height, speed, target, damage):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.speed = speed
         self.target = target
+        self.damage = damage
         self.rect = pygame.Rect(x, y, width, height)
-
 
 class Enemy():
     def __init__(self, x, y):
@@ -132,8 +155,11 @@ class Enemy():
         self.width = 20
         self.height = 20
         self.speed = 1
+        self.damage = 1
+        self.hp = 2
         self.rect = pygame.Rect(x, y, self.width, self.height)
-
+        self.bounce = 0
+        self.bounciness = 10
 
 def main():
     pygame.init()
@@ -150,6 +176,7 @@ def main():
         level_1.bullet_collision()
         level_1.player_collision()
         level_1.move_enemies()
+        print(player.hp)
 
         if player.hp <= 0:
             print("game over")
