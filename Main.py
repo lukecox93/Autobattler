@@ -27,7 +27,7 @@ class level():
             pygame.draw.rect(self.window, RED, (enemy.rect))
         for bullet in self.bullets:
             pygame.draw.rect(self.window, BLUE, (bullet.rect))
-            self.bullet_targeting(bullet)
+            pygame.Rect.move_ip(bullet.rect, bullet.delta_x, bullet.delta_y)
         if self.player.collided > 0:
             self.player.collided += 1
             if self.player.collided >= 5:
@@ -71,6 +71,37 @@ class level():
             bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3]
                             // 2), 10, 4, 5, self.player.target, 1)
             self.bullets.append(bullet)
+            self.bullet_targeting(bullet)
+
+    def bullet_targeting(self, bullet):
+        x_dist = (bullet.target.rect[0] - bullet.rect[0])
+        y_dist = (bullet.target.rect[1] - bullet.rect[1])
+        if x_dist == 0:
+            if y_dist != 0:
+                bullet.delta_x = 0
+                bullet.delta_y = round((y_dist * bullet.speed) / (abs(y_dist)))
+        elif y_dist == 0:
+            if x_dist != 0:
+                bullet.delta_y = 0
+                bullet.delta_x = round((x_dist * bullet.speed) / (abs(x_dist)))
+        elif y_dist == 0 and x_dist == 0:
+            bullet.delta_x, bullet.delta_y = bullet.speed, 0
+        else:
+            bullet.delta_x = round((x_dist * bullet.speed) / (min(abs(x_dist), abs(y_dist))))
+            bullet.delta_y = round((y_dist * bullet.speed) / (min(abs(x_dist), abs(y_dist))))
+
+        if bullet.delta_x > bullet.speed:
+            bullet.delta_y = abs(5 / bullet.delta_x) * bullet.delta_y
+            bullet.delta_x = bullet.speed
+        if bullet.delta_x < -bullet.speed:
+            bullet.delta_y = abs(5 / bullet.delta_x) * bullet.delta_y
+            bullet.delta_x = -bullet.speed
+        if bullet.delta_y > bullet.speed:
+            bullet.delta_x = abs(5 / bullet.delta_y) * bullet.delta_x
+            bullet.delta_y = bullet.speed
+        if bullet.delta_y < -bullet.speed:
+            bullet.delta_x = abs(5 / bullet.delta_y) * bullet.delta_x
+            bullet.delta_y = -bullet.speed
 
     def bullet_collision(self):
         for bullet in self.bullets:
@@ -113,20 +144,6 @@ class level():
             elif (enemy.rect[1] + enemy.rect[3]//2) > (self.player.rect[1] + self.player.rect[3]//2):
                 pygame.Rect.move_ip(enemy.rect, 0, -enemy.speed)
 
-    def bullet_targeting(self, bullet):
-        if bullet.target not in self.enemies:
-            pygame.Rect.move_ip(bullet.rect, bullet.speed, 0)
-        else:
-            if (bullet.rect[0] + bullet.rect[2] // 2) < (bullet.target.rect[0] + bullet.target.rect[2] // 2):
-                pygame.Rect.move_ip(bullet.rect, bullet.speed, 0)
-            elif (bullet.rect[0] + bullet.rect[2] // 2) > (bullet.target.rect[0] + bullet.target.rect[2] // 2):
-                pygame.Rect.move_ip(bullet.rect, -bullet.speed, 0)
-            if (bullet.rect[1] + bullet.rect[3] // 2) < (bullet.target.rect[1] + bullet.target.rect[3] // 2):
-                pygame.Rect.move_ip(bullet.rect, 0, bullet.speed)
-            elif (bullet.rect[1] + bullet.rect[3] // 2) > (bullet.target.rect[1] + bullet.target.rect[3] // 2):
-                pygame.Rect.move_ip(bullet.rect, 0, -bullet.speed)
-    #TODO - need to use trig or vectors to pathfind properly
-
 
 class Player():
     def __init__(self, x, y, width, height, speed, att_speed, hp):
@@ -164,6 +181,8 @@ class Bullet():
         self.target = target
         self.damage = damage
         self.rect = pygame.Rect(x, y, width, height)
+        self.delta_x = 0
+        self.delta_y = 0
 
 class Enemy():
     def __init__(self, x, y):
@@ -181,7 +200,7 @@ class Enemy():
 def main():
     pygame.init()
     clock = pygame.time.Clock()
-    player = Player(400, 200, 50, 50, 5, 5, 5)
+    player = Player(400, 200, 50, 50, 5, 4, 5)
     level_1 = level(player)
     level_1.events(player)
     while run:
@@ -193,7 +212,6 @@ def main():
         level_1.bullet_collision()
         level_1.player_collision()
         level_1.move_enemies()
-        print(level_1.enemies)
 
         if player.hp <= 0:
             print("game over")
