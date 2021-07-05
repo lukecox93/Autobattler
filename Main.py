@@ -24,14 +24,17 @@ class level():
     def draw_game(self):
         self.window.fill(WHITE)
         for enemy in self.enemies:
-            if enemy == self.player.target:
-                pygame.draw.rect(self.window, GREEN, (enemy.rect))
-            else:
-                pygame.draw.rect(self.window, RED, (enemy.rect))
+            pygame.draw.rect(self.window, RED, (enemy.rect))
         for bullet in self.bullets:
             pygame.draw.rect(self.window, BLUE, (bullet.rect))
-            pygame.Rect.move_ip(bullet.rect, bullet.speed, 0)
-        pygame.draw.rect(self.window, BLACK, (self.player.rect))
+            self.bullet_targeting(bullet)
+        if self.player.collided > 0:
+            self.player.collided += 1
+            if self.player.collided >= 5:
+                self.player.collided = 0
+        else:
+            self.player.colour = BLACK
+        pygame.draw.rect(self.window, self.player.colour, (self.player.rect))
         pygame.display.update()
 
     def events(self,player):
@@ -85,6 +88,8 @@ class level():
         if collision >= 0:
             self.player.hp -= self.enemies[collision].damage
             self.enemies[collision].hp -= self.player.body_damage
+            self.player.colour = RED
+            self.player.collided = 1
             if self.enemies[collision].hp <= 0:
                 del self.enemies[collision]
             else:
@@ -108,9 +113,19 @@ class level():
             elif (enemy.rect[1] + enemy.rect[3]//2) > (self.player.rect[1] + self.player.rect[3]//2):
                 pygame.Rect.move_ip(enemy.rect, 0, -enemy.speed)
 
-    def bullet_targeting(self):
-        pass
-    #TODO
+    def bullet_targeting(self, bullet):
+        if bullet.target not in self.enemies:
+            pygame.Rect.move_ip(bullet.rect, bullet.speed, 0)
+        else:
+            if (bullet.rect[0] + bullet.rect[2] // 2) < (bullet.target.rect[0] + bullet.target.rect[2] // 2):
+                pygame.Rect.move_ip(bullet.rect, bullet.speed, 0)
+            elif (bullet.rect[0] + bullet.rect[2] // 2) > (bullet.target.rect[0] + bullet.target.rect[2] // 2):
+                pygame.Rect.move_ip(bullet.rect, -bullet.speed, 0)
+            if (bullet.rect[1] + bullet.rect[3] // 2) < (bullet.target.rect[1] + bullet.target.rect[3] // 2):
+                pygame.Rect.move_ip(bullet.rect, 0, bullet.speed)
+            elif (bullet.rect[1] + bullet.rect[3] // 2) > (bullet.target.rect[1] + bullet.target.rect[3] // 2):
+                pygame.Rect.move_ip(bullet.rect, 0, -bullet.speed)
+    #TODO - need to use trig or vectors to pathfind properly
 
 
 class Player():
@@ -125,6 +140,8 @@ class Player():
         self.hp = hp
         self.target = None
         self.body_damage = 1
+        self.collided = 0
+        self.colour = BLACK
 
     def move(self, keys_pressed, level):
         if keys_pressed[pygame.K_LEFT] and self.rect[0] - self.speed > 0:
@@ -176,7 +193,7 @@ def main():
         level_1.bullet_collision()
         level_1.player_collision()
         level_1.move_enemies()
-        print(player.hp)
+        print(level_1.enemies)
 
         if player.hp <= 0:
             print("game over")
