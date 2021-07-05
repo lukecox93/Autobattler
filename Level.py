@@ -21,8 +21,8 @@ pygame.init()
 class Level():
     def __init__(self, player):
         self.player = player
-        self.width = 1800
-        self.height = 1000
+        self.width = 1920
+        self.height = 1080
         self.window = pygame.display.set_mode((self.width, self.height))
         self.fps = 60
         self.enemies = []
@@ -37,7 +37,13 @@ class Level():
         for enemy in self.enemies:
             pygame.draw.rect(self.window, RED, (enemy.rect))
             self.targeting(enemy)
-            pygame.Rect.move_ip(enemy.rect, enemy.delta_x, enemy.delta_y)
+            if enemy.bounce >= 1:
+                pygame.Rect.move_ip(enemy.rect, -enemy.delta_x, -enemy.delta_y)
+                enemy.bounce += 1
+                if enemy.bounce >= enemy.bounciness:
+                    enemy.bounce = 0
+            else:
+                pygame.Rect.move_ip(enemy.rect, enemy.delta_x, enemy.delta_y)
         for bullet in self.bullets:
             pygame.draw.rect(self.window, BLUE, (bullet.rect))
             pygame.Rect.move_ip(bullet.rect, bullet.delta_x, bullet.delta_y)
@@ -48,13 +54,17 @@ class Level():
         else:
             self.player.colour = BLACK
         pygame.draw.rect(self.window, self.player.colour, (self.player.rect))
+        health_rect = (self.player.rect[0], self.player.rect[1] - 10, self.player.rect[2] * (self.player.hp/self.player.max_hp), 5)
+        pygame.draw.rect(self.window, GREEN, health_rect)
+        if self.player.hp < self.player.max_hp:
+            pygame.draw.rect(self.window, RED, (health_rect[0] + health_rect[2], health_rect[1], self.player.rect[2] - health_rect[2], 5))
         pygame.display.update()
 
     def events(self,player):
         self.enemy_type_1 = pygame.USEREVENT + 1
         pygame.time.set_timer(self.enemy_type_1, 1000)
         self.create_bullet = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.create_bullet, 1000//player.att_speed)
+        pygame.time.set_timer(self.create_bullet, round(1000/player.att_speed))
 
     def event_handler(self):
         events = pygame.event.get()
@@ -86,11 +96,10 @@ class Level():
                             // 2), 4, 4, 15, self.player.target, 1)
             self.bullets.append(bullet)
             self.targeting(bullet)
-            print(bullet.target)
 
     def targeting(self, bullet):
-        x_dist = (bullet.target.rect[0] - bullet.rect[0])
-        y_dist = (bullet.target.rect[1] - bullet.rect[1])
+        x_dist = ((bullet.target.rect[0] + (bullet.target.rect[2] // 2)) - (bullet.rect[0] + (bullet.rect[2] // 2)))
+        y_dist = (bullet.target.rect[1] + (bullet.target.rect[3] // 2) - (bullet.rect[1] + (bullet.rect[2] // 2)))
         if x_dist == 0:
             if y_dist != 0:
                 bullet.delta_x = 0
@@ -136,6 +145,7 @@ class Level():
             self.enemies[collision].hp -= self.player.body_damage
             self.player.colour = RED
             self.player.collided = 1
+            self.enemies[collision].bounce = 1
             if self.enemies[collision].hp <= 0:
                 del self.enemies[collision]
             else:

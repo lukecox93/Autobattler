@@ -13,7 +13,7 @@ pygame.display.set_caption("Autobattler")
 def main():
     pygame.init()
     clock = pygame.time.Clock()
-    player = Player(900, 500, 50, 50, 10, 4, 5)
+    player = Player(900, 500, 50, 50, 5, 4, 5)
     level_1 = Level(player)
     level_1.events(player)
     while level_1.run:

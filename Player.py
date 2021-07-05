@@ -17,6 +17,7 @@ class Player():
         self.speed = speed
         self.att_speed = att_speed
         self.rect = pygame.Rect(x, y, width, height)
+        self.max_hp = hp
         self.hp = hp
         self.target = None
         self.body_damage = 1
