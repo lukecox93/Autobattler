@@ -80,6 +80,17 @@ class level():
             del self.enemies[collision]
             self.player.hp -= 1
 
+    def move_enemies(self):
+        for enemy in self.enemies:
+            if (enemy.rect[0] + enemy.rect[2]//2) < (self.player.rect[0] + self.player.rect[2]//2):
+                pygame.Rect.move_ip(enemy.rect, enemy.speed, 0)
+            elif (enemy.rect[0] + enemy.rect[2]//2) > (self.player.rect[0] + self.player.rect[2]//2):
+                pygame.Rect.move_ip(enemy.rect, -enemy.speed, 0)
+            if (enemy.rect[1] + enemy.rect[3]//2) < (self.player.rect[1] + self.player.rect[3]//2):
+                pygame.Rect.move_ip(enemy.rect, 0, enemy.speed)
+            elif (enemy.rect[1] + enemy.rect[3]//2) > (self.player.rect[1] + self.player.rect[3]//2):
+                pygame.Rect.move_ip(enemy.rect, 0, -enemy.speed)
+
 
 class Player():
     def __init__(self, x, y, width, height, speed, att_speed, hp):
@@ -120,14 +131,14 @@ class Enemy():
         self.y = y
         self.width = 20
         self.height = 20
-        self.velocity = 5
+        self.speed = 1
         self.rect = pygame.Rect(x, y, self.width, self.height)
 
 
 def main():
     pygame.init()
     clock = pygame.time.Clock()
-    player = Player(400, 200, 50, 50, 5, 5, 10)
+    player = Player(400, 200, 50, 50, 5, 5, 5)
     level_1 = level(player)
     level_1.events(player)
     while run:
@@ -138,6 +149,8 @@ def main():
         player.move(keys_pressed, level_1)
         level_1.bullet_collision()
         level_1.player_collision()
+        level_1.move_enemies()
+
         if player.hp <= 0:
             print("game over")
             level_1.window.fill(RED)
