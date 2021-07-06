@@ -22,6 +22,8 @@ class Player():
         self.level = 1
         self.base_bullet_damage = 1
         self.bullet_damage = self.base_bullet_damage * self.level
+        self.base_bullet_size = 6
+        self.bullet_size = 6
         self.xp = 0
         self.base_xp_to_level_up = 3
         self.xp_to_level_up = (self.base_xp_to_level_up * self.level)
@@ -66,6 +68,7 @@ class Player():
     def level_up(self):
         self.bullet_damage = round(self.bullet_damage * 1.1, 2)
         self.att_speed = round(self.att_speed * 1.1, 2)
+        self.bullet_size = round(self.bullet_size * 1.2, 2)
         self.level += 1
         self.xp = 0
         self.xp_to_level_up = self.base_xp_to_level_up * self.level

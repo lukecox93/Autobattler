@@ -86,8 +86,9 @@ class Level():
         if targets:
             closest_enemy_index = targets.index(min(targets))
             self.player.target = self.enemies[closest_enemy_index]
+            #TODO = bullets spawn based on their top left coordinates rather than their centre, only becomes an issue with larger bullet sizes but worth changing
             bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3]
-                            // 2), 6, 6, 15, self.player.target, self.player.bullet_damage)
+                            // 2), round(self.player.bullet_size), round(self.player.bullet_size), 15, self.player.target, self.player.bullet_damage)
             self.bullets.append(bullet)
             self.targeting(bullet)
 
