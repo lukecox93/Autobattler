@@ -20,11 +20,18 @@ def main():
         clock.tick(level_1.fps)
         level_1.event_handler()
         level_1.draw_game()
+        level_1.player.player_collided()
         keys_pressed = pygame.key.get_pressed()
         player.move(keys_pressed, level_1)
         level_1.bullet_collision()
-        if level_1.player_collision():
+        level_1.player_collision()
+        if level_1.player.check_hp():
+            level_1.window.fill(RED)
+            pygame.display.update()
+            pygame.time.wait(2000)
             main()
+        level_1.player.check_level_up()
+        print(level_1.player.level, level_1.player.att_speed)
 
     pygame.quit()
 

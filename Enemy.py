@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 pygame.init()
@@ -17,3 +19,4 @@ class Enemy():
         self.target = target
         self.delta_x = 0
         self.delta_y = 0
+        self.given_xp = random.randint(1, 3)

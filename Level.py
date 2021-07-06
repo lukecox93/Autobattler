@@ -47,17 +47,11 @@ class Level():
         for bullet in self.bullets:
             pygame.draw.rect(self.window, BLUE, (bullet.rect))
             pygame.Rect.move_ip(bullet.rect, bullet.delta_x, bullet.delta_y)
-        if self.player.collided > 0:
-            self.player.collided += 1
-            if self.player.collided >= 5:
-                self.player.collided = 0
-        else:
-            self.player.colour = BLACK
+
         pygame.draw.rect(self.window, self.player.colour, (self.player.rect))
-        health_rect = (self.player.rect[0], self.player.rect[1] - 10, self.player.rect[2] * (self.player.hp/self.player.max_hp), 5)
-        pygame.draw.rect(self.window, GREEN, health_rect)
-        if self.player.hp < self.player.max_hp:
-            pygame.draw.rect(self.window, RED, (health_rect[0] + health_rect[2], health_rect[1], self.player.rect[2] - health_rect[2], 5))
+        self.player.draw_health_bar(self)
+        self.player.draw_xp_bar(self)
+
         pygame.display.update()
 
     def events(self,player):
@@ -93,39 +87,39 @@ class Level():
             closest_enemy_index = targets.index(min(targets))
             self.player.target = self.enemies[closest_enemy_index]
             bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3]
-                            // 2), 4, 4, 15, self.player.target, 1)
+                            // 2), 6, 6, 15, self.player.target, self.player.bullet_damage)
             self.bullets.append(bullet)
             self.targeting(bullet)
 
-    def targeting(self, bullet):
-        x_dist = ((bullet.target.rect[0] + (bullet.target.rect[2] // 2)) - (bullet.rect[0] + (bullet.rect[2] // 2)))
-        y_dist = (bullet.target.rect[1] + (bullet.target.rect[3] // 2) - (bullet.rect[1] + (bullet.rect[2] // 2)))
+    def targeting(self, sprite):
+        x_dist = ((sprite.target.rect[0] + (sprite.target.rect[2] // 2)) - (sprite.rect[0] + (sprite.rect[2] // 2)))
+        y_dist = (sprite.target.rect[1] + (sprite.target.rect[3] // 2) - (sprite.rect[1] + (sprite.rect[2] // 2)))
         if x_dist == 0:
             if y_dist != 0:
-                bullet.delta_x = 0
-                bullet.delta_y = round((y_dist * bullet.speed) / (abs(y_dist)))
+                sprite.delta_x = 0
+                sprite.delta_y = round((y_dist * sprite.speed) / (abs(y_dist)))
         elif y_dist == 0:
             if x_dist != 0:
-                bullet.delta_y = 0
-                bullet.delta_x = round((x_dist * bullet.speed) / (abs(x_dist)))
+                sprite.delta_y = 0
+                sprite.delta_x = round((x_dist * sprite.speed) / (abs(x_dist)))
         elif y_dist == 0 and x_dist == 0:
-            bullet.delta_x, bullet.delta_y = bullet.speed, 0
+            sprite.delta_x, sprite.delta_y = sprite.speed, 0
         else:
-            bullet.delta_x = round((x_dist * bullet.speed) / (min(abs(x_dist), abs(y_dist))))
-            bullet.delta_y = round((y_dist * bullet.speed) / (min(abs(x_dist), abs(y_dist))))
+            sprite.delta_x = round((x_dist * sprite.speed) / (min(abs(x_dist), abs(y_dist))))
+            sprite.delta_y = round((y_dist * sprite.speed) / (min(abs(x_dist), abs(y_dist))))
 
-        if bullet.delta_x > bullet.speed:
-            bullet.delta_y = abs(bullet.speed / bullet.delta_x) * bullet.delta_y
-            bullet.delta_x = bullet.speed
-        if bullet.delta_x < -bullet.speed:
-            bullet.delta_y = abs(bullet.speed / bullet.delta_x) * bullet.delta_y
-            bullet.delta_x = -bullet.speed
-        if bullet.delta_y > bullet.speed:
-            bullet.delta_x = abs(bullet.speed / bullet.delta_y) * bullet.delta_x
-            bullet.delta_y = bullet.speed
-        if bullet.delta_y < -bullet.speed:
-            bullet.delta_x = abs(bullet.speed / bullet.delta_y) * bullet.delta_x
-            bullet.delta_y = -bullet.speed
+        if sprite.delta_x > sprite.speed:
+            sprite.delta_y = abs(sprite.speed / sprite.delta_x) * sprite.delta_y
+            sprite.delta_x = sprite.speed
+        if sprite.delta_x < -sprite.speed:
+            sprite.delta_y = abs(sprite.speed / sprite.delta_x) * sprite.delta_y
+            sprite.delta_x = -sprite.speed
+        if sprite.delta_y > sprite.speed:
+            sprite.delta_x = abs(sprite.speed / sprite.delta_y) * sprite.delta_x
+            sprite.delta_y = sprite.speed
+        if sprite.delta_y < -sprite.speed:
+            sprite.delta_x = abs(sprite.speed / sprite.delta_y) * sprite.delta_x
+            sprite.delta_y = -sprite.speed
 
     def bullet_collision(self):
         for bullet in self.bullets:
@@ -133,10 +127,14 @@ class Level():
             if collision >= 0:
                 self.enemies[collision].hp -= bullet.damage
                 if self.enemies[collision].hp <= 0:
-                    del self.enemies[collision]
+                    self.enemy_killed(self.enemies[collision])
                 self.bullets.remove(bullet)
             elif bullet.x > self.width or bullet.x < 0 or bullet.y > self.height or bullet.y < 0:
                 self.bullets.remove(bullet)
+
+    def enemy_killed(self, enemy):
+        self.player.xp += enemy.given_xp
+        self.enemies.remove(enemy)
 
     def player_collision(self):
         collision = pygame.Rect.collidelist(self.player.rect, self.enemies)
@@ -150,5 +148,4 @@ class Level():
                 del self.enemies[collision]
             else:
                 self.enemies[collision].speed = -self.enemies[collision].speed*2
-            return self.player.check_hp(self)
 

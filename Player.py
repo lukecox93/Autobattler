@@ -10,10 +10,6 @@ pygame.init()
 
 class Player():
     def __init__(self, x, y, width, height, speed, att_speed, hp):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
         self.speed = speed
         self.att_speed = att_speed
         self.rect = pygame.Rect(x, y, width, height)
@@ -23,6 +19,12 @@ class Player():
         self.body_damage = 1
         self.collided = 0
         self.colour = BLACK
+        self.level = 1
+        self.base_bullet_damage = 1
+        self.bullet_damage = self.base_bullet_damage * self.level
+        self.xp = 0
+        self.base_xp_to_level_up = 3
+        self.xp_to_level_up = (self.base_xp_to_level_up * self.level)
 
     def move(self, keys_pressed, level):
         if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed > 0:
@@ -34,10 +36,36 @@ class Player():
         if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and self.rect[1] + self.speed + self.rect[3] < level.height:
             pygame.Rect.move_ip(self.rect, 0, self.speed)
 
-    def check_hp(self, level):
-        if level.player.hp <= 0:
-            level.window.fill(RED)
-            pygame.display.update()
-            pygame.time.wait(2000)
+    def draw_health_bar(self, level):
+        health_rect = (self.rect[0], self.rect[1] - 10, self.rect[2] * (self.hp/self.max_hp), 5)
+        pygame.draw.rect(level.window, RED, (self.rect[0], self.rect[1] - 10, self.rect[2], 5))
+        pygame.draw.rect(level.window, GREEN, health_rect)
+
+    def draw_xp_bar(self, level):
+        xp_rect = (5, 5, ((level.width - 10) * (self.xp / self.xp_to_level_up)), 5)
+        pygame.draw.rect(level.window, BLACK, xp_rect)
+
+    def player_collided(self):
+        if self.collided > 0:
+            self.collided += 1
+            if self.collided >= 5:
+                self.collided = 0
+        else:
+            self.colour = BLACK
+
+    def check_hp(self):
+        if self.hp <= 0:
             return True
         return False
+
+    def check_level_up(self):
+        if self.xp >= self.xp_to_level_up:
+            self.level_up()
+
+
+    def level_up(self):
+        self.bullet_damage = round(self.bullet_damage * 1.1, 2)
+        self.att_speed = round(self.att_speed * 1.1, 2)
+        self.level += 1
+        self.xp = 0
+        self.xp_to_level_up = self.base_xp_to_level_up * self.level
