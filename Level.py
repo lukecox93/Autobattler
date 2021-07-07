@@ -95,32 +95,9 @@ class Level():
     def targeting(self, sprite):
         x_dist = ((sprite.target.rect[0] + (sprite.target.rect[2] // 2)) - (sprite.rect[0] + (sprite.rect[2] // 2)))
         y_dist = (sprite.target.rect[1] + (sprite.target.rect[3] // 2) - (sprite.rect[1] + (sprite.rect[2] // 2)))
-        if x_dist == 0:
-            if y_dist != 0:
-                sprite.delta_x = 0
-                sprite.delta_y = round((y_dist * sprite.speed) / (abs(y_dist)))
-        elif y_dist == 0:
-            if x_dist != 0:
-                sprite.delta_y = 0
-                sprite.delta_x = round((x_dist * sprite.speed) / (abs(x_dist)))
-        elif y_dist == 0 and x_dist == 0:
-            sprite.delta_x, sprite.delta_y = sprite.speed, 0
-        else:
-            sprite.delta_x = round((x_dist * sprite.speed) / (min(abs(x_dist), abs(y_dist))))
-            sprite.delta_y = round((y_dist * sprite.speed) / (min(abs(x_dist), abs(y_dist))))
 
-        if sprite.delta_x > sprite.speed:
-            sprite.delta_y = abs(sprite.speed / sprite.delta_x) * sprite.delta_y
-            sprite.delta_x = sprite.speed
-        if sprite.delta_x < -sprite.speed:
-            sprite.delta_y = abs(sprite.speed / sprite.delta_x) * sprite.delta_y
-            sprite.delta_x = -sprite.speed
-        if sprite.delta_y > sprite.speed:
-            sprite.delta_x = abs(sprite.speed / sprite.delta_y) * sprite.delta_x
-            sprite.delta_y = sprite.speed
-        if sprite.delta_y < -sprite.speed:
-            sprite.delta_x = abs(sprite.speed / sprite.delta_y) * sprite.delta_x
-            sprite.delta_y = -sprite.speed
+        sprite.delta_x = round((x_dist * sprite.speed) / (max(abs(x_dist), abs(y_dist))))
+        sprite.delta_y = round((y_dist * sprite.speed) / (max(abs(x_dist), abs(y_dist))))
 
     def bullet_collision(self):
         for bullet in self.bullets:
