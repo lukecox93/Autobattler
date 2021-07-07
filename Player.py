@@ -9,6 +9,9 @@ GREEN = (0, 255, 0)
 pygame.init()
 
 class Player():
+    xp_to_level_up = 3
+    colour = BLACK
+
     def __init__(self, x, y, width, height, speed, att_speed, hp):
         self.speed = speed
         self.att_speed = att_speed
@@ -18,15 +21,13 @@ class Player():
         self.target = None
         self.body_damage = 1
         self.collided = 0
-        self.colour = BLACK
         self.level = 1
         self.base_bullet_damage = 1
         self.bullet_damage = self.base_bullet_damage * self.level
         self.base_bullet_size = 6
         self.bullet_size = 6
         self.xp = 0
-        self.base_xp_to_level_up = 3
-        self.xp_to_level_up = (self.base_xp_to_level_up * self.level)
+        self.xp_to_level_up = (Player.xp_to_level_up * self.level)
 
     def move(self, keys_pressed, level):
         if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed > 0:
@@ -71,4 +72,4 @@ class Player():
         self.bullet_size = round(self.bullet_size * 1.2, 2)
         self.level += 1
         self.xp = 0
-        self.xp_to_level_up = self.base_xp_to_level_up * self.level
+        self.xp_to_level_up = Player.xp_to_level_up * self.level

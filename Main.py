@@ -1,6 +1,7 @@
 import pygame
 from Player import Player
 from Level import Level
+from Enemy import Enemy
 
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
@@ -31,7 +32,6 @@ def main():
             pygame.time.wait(2000)
             main()
         level_1.player.check_level_up()
-        print(level_1.player.level, level_1.player.att_speed)
 
     pygame.quit()
 

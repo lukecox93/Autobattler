@@ -4,6 +4,7 @@ import math
 import sys
 from Enemy import Enemy
 from Bullet import Bullet
+from Player import Player
 pygame.font.init()
 
 
@@ -56,9 +57,11 @@ class Level():
 
     def events(self,player):
         self.enemy_type_1 = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.enemy_type_1, 1000)
+        pygame.time.set_timer(self.enemy_type_1, 1000//Enemy.spawn_rate)
         self.create_bullet = pygame.USEREVENT + 2
         pygame.time.set_timer(self.create_bullet, round(1000/player.att_speed))
+        self.increase_spawn_rate = pygame.USEREVENT + 3
+        pygame.time.set_timer(self.increase_spawn_rate, 2000)
 
     def event_handler(self):
         events = pygame.event.get()
@@ -71,10 +74,12 @@ class Level():
                     self.run = False
                     sys.exit()
             if event.type == pygame.USEREVENT + 1:
-                enemy = Enemy(random.randint(0, self.width), random.randint(0, self.height), self.player)
+                enemy = Enemy(self)
                 self.enemies.append(enemy)
             if event.type == pygame.USEREVENT + 2: #create bullet
                 self.target_finder()
+            if event.type == pygame.USEREVENT + 3:
+                Enemy.spawn_rate += 1
 
     def target_finder(self):
         targets = []
@@ -88,7 +93,7 @@ class Level():
             self.player.target = self.enemies[closest_enemy_index]
             #TODO = bullets spawn based on their top left coordinates rather than their centre, only becomes an issue with larger bullet sizes but worth changing
             bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3]
-                            // 2), round(self.player.bullet_size), round(self.player.bullet_size), 15, self.player.target, self.player.bullet_damage)
+                            // 2), self.player)
             self.bullets.append(bullet)
             self.targeting(bullet)
 
@@ -107,7 +112,7 @@ class Level():
                 if self.enemies[collision].hp <= 0:
                     self.enemy_killed(self.enemies[collision])
                 self.bullets.remove(bullet)
-            elif bullet.x > self.width or bullet.x < 0 or bullet.y > self.height or bullet.y < 0:
+            elif bullet.rect[0] > self.width or bullet.rect[0] < 0 or bullet.rect[1] > self.height or bullet.rect[1] < 0:
                 self.bullets.remove(bullet)
 
     def enemy_killed(self, enemy):
@@ -119,7 +124,7 @@ class Level():
         if collision >= 0:
             self.player.hp -= self.enemies[collision].damage
             self.enemies[collision].hp -= self.player.body_damage
-            self.player.colour = RED
+            Player.colour = RED
             self.player.collided = 1
             self.enemies[collision].bounce = 1
             if self.enemies[collision].hp <= 0:
