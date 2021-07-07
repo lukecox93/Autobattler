@@ -5,7 +5,6 @@ import pygame
 pygame.init()
 
 class Enemy():
-    spawn_rate = 1
     speed = 4
     width = 20
     height = 20

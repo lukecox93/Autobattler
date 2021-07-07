@@ -1,7 +1,9 @@
 import pygame
 from Player import Player
 from Level import Level
+import os.path
 from Enemy import Enemy
+
 
 BLACK = (0,0,0)
 WHITE = (255, 255, 255)
@@ -13,8 +15,11 @@ pygame.display.set_caption("Autobattler")
 
 def main():
     pygame.init()
+    if not os.path.isfile("High score.txt"):
+        with open("High score.txt", "w") as file:
+            file.write("0")
     clock = pygame.time.Clock()
-    player = Player(900, 500, 50, 50, 5, 4, 5)
+    player = Player(935, 515, 50, 50, 5, 1, 1)
     level_1 = Level(player)
     level_1.events(player)
     while level_1.run:
@@ -25,11 +30,8 @@ def main():
         keys_pressed = pygame.key.get_pressed()
         player.move(keys_pressed, level_1)
         level_1.bullet_collision()
-        level_1.player_collision()
-        if level_1.player.check_hp():
-            level_1.window.fill(RED)
-            pygame.display.update()
-            pygame.time.wait(2000)
+        if level_1.player_collision():
+            level_1.game_over()
             main()
         level_1.player.check_level_up()
 
