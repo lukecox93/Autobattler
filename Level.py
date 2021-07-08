@@ -29,6 +29,8 @@ class Level():
         self.targets = []
         self.run = True
         self.enemy_spawn_rate = 1
+        self.gameover = False
+        self.game_over_rect = None
 
     def draw_game(self):
         self.window.fill(WHITE)
@@ -57,12 +59,22 @@ class Level():
     def events(self,player):
         self.enemy_type_1 = pygame.USEREVENT + 1
         pygame.time.set_timer(self.enemy_type_1, 1000//self.enemy_spawn_rate)
-        self.create_bullet = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.create_bullet, round(1000/player.att_speed))
+        self.bullet_cooldown = pygame.USEREVENT + 2
+        pygame.time.set_timer(self.bullet_cooldown, round(1000/player.att_speed))
         self.increase_spawn_rate = pygame.USEREVENT + 3
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
         self.increase_score = pygame.USEREVENT + 4
         pygame.time.set_timer(self.increase_score, 1000)
+
+    def pause_events(self):
+        self.enemy_type_1 = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.enemy_type_1, 0)
+        self.bullet_cooldown = pygame.USEREVENT + 2
+        pygame.time.set_timer(self.bullet_cooldown, 0)
+        self.increase_spawn_rate = pygame.USEREVENT + 3
+        pygame.time.set_timer(self.increase_spawn_rate, 0)
+        self.increase_score = pygame.USEREVENT + 4
+        pygame.time.set_timer(self.increase_score, 0)
 
     def event_handler(self):
         events = pygame.event.get()
@@ -83,6 +95,14 @@ class Level():
                 self.enemy_spawn_rate += 1
             if event.type == pygame.USEREVENT + 4:
                 self.player.score += 1
+            if self.gameover == True:
+                if pygame.Rect.collidepoint(self.game_over_rect, pygame.mouse.get_pos()):
+                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                        self.gameover = False
+                else:
+                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def target_finder(self):
         targets = []
@@ -94,11 +114,14 @@ class Level():
         if targets:
             closest_enemy_index = targets.index(min(targets))
             self.player.target = self.enemies[closest_enemy_index]
-            #TODO = bullets spawn based on their top left coordinates rather than their centre, only becomes an issue with larger bullet sizes but worth changing
-            bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2), self.player.rect[1] + (self.player.rect[3]
-                            // 2), self.player)
-            self.bullets.append(bullet)
-            self.targeting(bullet)
+            self.create_bullet()
+
+
+    def create_bullet(self):
+        bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2) - Bullet.width//2, self.player.rect[1] + (self.player.rect[3]
+                                                                                                 // 2) - Bullet.height//2, self.player)
+        self.bullets.append(bullet)
+        self.targeting(bullet)
 
     def targeting(self, sprite):
         x_dist = ((sprite.target.rect[0] + (sprite.target.rect[2] // 2)) - (sprite.rect[0] + (sprite.rect[2] // 2)))
@@ -136,39 +159,44 @@ class Level():
                 self.enemies[collision].speed = -self.enemies[collision].speed*2
             return self.player.check_hp()
 
-
     def get_high_score(self):
         with open("High score.txt", "r") as file:
-            high_score = int(file.read(1))
+            high_score = int(file.read())
             return high_score
 
     def game_over(self):
+        self.pause_events()
+        self.enemies = []
+        self.bullets = []
+        self.draw_game_over_screen()
+        self.gameover = True
+        while self.gameover:
+            self.event_handler()
+
+    def draw_game_over_screen(self):
         score_text = MAIN_FONT.render("You lasted " + str(self.player.score) + " seconds", True, BLACK)
         game_over_text = MAIN_FONT.render("Game Over!", True, BLACK)
+        self.new_game_text = MAIN_FONT.render("Try again", True, BLACK)
+        self.game_over_rect = pygame.rect.Rect(Level.width // 2 - self.new_game_text.get_width() // 2 - 10,
+                                               Level.height // (3/2) - self.new_game_text.get_height() // 2 - 10,
+                                               self.new_game_text.get_width() + 20,
+                                               self.new_game_text.get_height() + 20)
         high_score = self.get_high_score()
         self.window.fill(RED)
         if self.player.score > high_score:
             high_score_text = MAIN_FONT.render("New High Score! You lasted " + str(self.player.score) + " seconds", True, BLACK)
-            self.window.blit(high_score_text, ((Level.width//2 - high_score_text.get_width()//2, (Level.height // 2))))
-            with open("High score.txt", "w") as file:
-                file.write(str(self.player.score))
+            self.window.blit(high_score_text, (Level.width//2 - high_score_text.get_width()//2, (Level.height // 2)))
+            self.record_new_high_score()
         else:
             high_score_text = MAIN_FONT.render("High Score: " + str(high_score) + " seconds", True, BLACK)
-            self.window.blit(score_text, ((Level.width//2 - score_text.get_width()//2,  (Level.height//2))))
+            self.window.blit(score_text, (Level.width//2 - score_text.get_width()//2,  (Level.height//2)))
             self.window.blit(high_score_text, ((Level.width//2 - high_score_text.get_width()//2), Level.height//2 + high_score_text.get_height()))
-        self.window.blit(game_over_text, ((Level.width//2 - game_over_text.get_width()//2), (Level.height//2 - game_over_text.get_height())))
+        self.window.blit(game_over_text, (
+        (Level.width // 2 - game_over_text.get_width() // 2), (Level.height // 2 - game_over_text.get_height())))
+        pygame.draw.rect(self.window, WHITE, self.game_over_rect)
+        self.window.blit(self.new_game_text, (self.game_over_rect[0] + 10, self.game_over_rect[1] + 10))
         pygame.display.update()
-        self.pause_events()
-        pygame.time.delay(2000)
-        self.enemies = []
-        self.bullets = []
 
-    def pause_events(self):
-        self.enemy_type_1 = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.enemy_type_1, 0)
-        self.create_bullet = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.create_bullet, 0)
-        self.increase_spawn_rate = pygame.USEREVENT + 3
-        pygame.time.set_timer(self.increase_spawn_rate, 0)
-        self.increase_score = pygame.USEREVENT + 4
-        pygame.time.set_timer(self.increase_score, 0)
+    def record_new_high_score(self):
+        with open("High score.txt", "w") as file:
+            file.write(str(self.player.score))
