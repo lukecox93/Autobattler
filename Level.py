@@ -1,14 +1,13 @@
 import pygame
 import math
 import sys
-from Enemy import Enemy
-from Bullet import Bullet
 from Player import Player
-from Basic_Enemy import Basic_enemy
+from Basic_enemy import BasicEnemy
+from Big_enemy import BigEnemy
 
 pygame.font.init()
 
-BLACK = (0,0,0)
+BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
@@ -16,10 +15,18 @@ GREEN = (0, 255, 0)
 
 MAIN_FONT = pygame.font.SysFont("Verdana", 30)
 
-class Level():
+
+class Level:
     width = 1920
     height = 1080
+
     def __init__(self, player):
+        self.new_game_text = MAIN_FONT.render("Try again", True, BLACK)
+        self.exit_text = MAIN_FONT.render("Quit", True, BLACK)
+        self.spawn_basic_enemy = pygame.USEREVENT + 1
+        self.spawn_big_enemy = pygame.USEREVENT + 2
+        self.increase_spawn_rate = pygame.USEREVENT + 3
+        self.increase_score = pygame.USEREVENT + 4
         self.player = player
         self.window = pygame.display.set_mode((Level.width, Level.height))
         self.fps = 60
@@ -36,43 +43,24 @@ class Level():
         health_text = MAIN_FONT.render("HP: " + str(self.player.hp), True, BLACK)
         self.window.blit(health_text, (Level.width - health_text.get_width() - 10, 10))
         for enemy in self.enemies:
-            pygame.draw.rect(self.window, RED, (enemy.rect))
-            self.targeting(enemy)
-            if enemy.bounce >= 1:
-                pygame.Rect.move_ip(enemy.rect, -enemy.delta_x, -enemy.delta_y)
-                enemy.bounce += 1
-                if enemy.bounce >= enemy.bounciness:
-                    enemy.bounce = 0
-            else:
-                pygame.Rect.move_ip(enemy.rect, enemy.delta_x, enemy.delta_y)
+            enemy.draw(self)
         for bullet in self.bullets:
-            pygame.draw.rect(self.window, BLUE, (bullet.rect))
-            pygame.Rect.move_ip(bullet.rect, bullet.delta_x, bullet.delta_y)
-
-        pygame.draw.rect(self.window, self.player.colour, (self.player.rect))
+            bullet.draw(self)
+        pygame.draw.rect(self.window, self.player.colour, self.player.rect)
         self.player.draw_health_bar(self)
         self.player.draw_xp_bar(self)
-
         pygame.display.update()
 
-    def events(self,player):
-        self.enemy_type_1 = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.enemy_type_1, 1000//self.enemy_spawn_rate)
-        self.bullet_cooldown = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.bullet_cooldown, round(1000/player.att_speed))
-        self.increase_spawn_rate = pygame.USEREVENT + 3
+    def events(self):
+        pygame.time.set_timer(self.spawn_basic_enemy, 1000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_big_enemy, 4000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
-        self.increase_score = pygame.USEREVENT + 4
         pygame.time.set_timer(self.increase_score, 1000)
 
     def pause_events(self):
-        self.enemy_type_1 = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.enemy_type_1, 0)
-        self.bullet_cooldown = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.bullet_cooldown, 0)
-        self.increase_spawn_rate = pygame.USEREVENT + 3
+        pygame.time.set_timer(self.spawn_basic_enemy, 0)
+        pygame.time.set_timer(self.spawn_big_enemy, 0)
         pygame.time.set_timer(self.increase_spawn_rate, 0)
-        self.increase_score = pygame.USEREVENT + 4
         pygame.time.set_timer(self.increase_score, 0)
 
     def event_handler(self):
@@ -86,20 +74,26 @@ class Level():
                     self.run = False
                     sys.exit()
             if event.type == pygame.USEREVENT + 1:
-                enemy = Enemy(self)
+                enemy = BasicEnemy(self)
                 self.enemies.append(enemy)
-            if event.type == pygame.USEREVENT + 2: #create bullet
-                self.target_finder()
+            if event.type == pygame.USEREVENT + 2:
+                enemy = BigEnemy(self)
+                self.enemies.append(enemy)
             if event.type == pygame.USEREVENT + 3:
                 self.enemy_spawn_rate += 1
             if event.type == pygame.USEREVENT + 4:
                 self.player.score += 1
-            if self.gameover == True:
+            if self.gameover:
                 if pygame.Rect.collidepoint(self.game_over_rect, pygame.mouse.get_pos()):
                     pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
                         self.gameover = False
+                elif pygame.Rect.collidepoint(self.exit_rect, pygame.mouse.get_pos()):
+                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                        sys.exit()
                 else:
                     pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
@@ -108,19 +102,12 @@ class Level():
         for enemy in self.enemies:  # find closest enemy
             targets.append(math.sqrt(
                 (abs((enemy.rect[0] + enemy.rect[2] // 2) - (self.player.rect[0] + self.player.rect[2] // 2)) ** 2) + (
-                            abs((enemy.rect[1] + enemy.rect[3] // 2) - (self.player.rect[1] + self.player.rect[3] // 2))
-                            ** 2)))
+                        abs((enemy.rect[1] + enemy.rect[3] // 2) - (self.player.rect[1] + self.player.rect[3] // 2))
+                        ** 2)))
         if targets:
             closest_enemy_index = targets.index(min(targets))
             self.player.target = self.enemies[closest_enemy_index]
-            self.create_bullet()
-
-
-    def create_bullet(self):
-        bullet = Bullet(self.player.rect[0] + (self.player.rect[2] // 2) - Bullet.width//2, self.player.rect[1] + (self.player.rect[3]
-                                                                                                 // 2) - Bullet.height//2, self.player)
-        self.bullets.append(bullet)
-        self.targeting(bullet)
+            self.player.shoot(self)
 
     def targeting(self, sprite):
         x_dist = ((sprite.target.rect[0] + (sprite.target.rect[2] // 2)) - (sprite.rect[0] + (sprite.rect[2] // 2)))
@@ -137,7 +124,8 @@ class Level():
                 if self.enemies[collision].hp <= 0:
                     self.enemy_killed(self.enemies[collision])
                 self.bullets.remove(bullet)
-            elif bullet.rect[0] > Level.width or bullet.rect[0] < 0 or bullet.rect[1] > Level.height or bullet.rect[1] < 0:
+            elif bullet.rect[0] > Level.width or bullet.rect[0] < 0 or bullet.rect[1] > Level.height or \
+                    bullet.rect[1] < 0:
                 self.bullets.remove(bullet)
 
     def enemy_killed(self, enemy):
@@ -155,7 +143,7 @@ class Level():
             if self.enemies[collision].hp <= 0:
                 del self.enemies[collision]
             else:
-                self.enemies[collision].speed = -self.enemies[collision].speed*2
+                self.enemies[collision].speed = -self.enemies[collision].speed * 2
             return self.player.check_hp()
 
     def get_high_score(self):
@@ -175,25 +163,34 @@ class Level():
     def draw_game_over_screen(self):
         score_text = MAIN_FONT.render("You lasted " + str(self.player.score) + " seconds", True, BLACK)
         game_over_text = MAIN_FONT.render("Game Over!", True, BLACK)
-        self.new_game_text = MAIN_FONT.render("Try again", True, BLACK)
         self.game_over_rect = pygame.rect.Rect(Level.width // 2 - self.new_game_text.get_width() // 2 - 10,
-                                               Level.height // (3/2) - self.new_game_text.get_height() // 2 - 10,
+                                               Level.height // (3 / 2) - self.new_game_text.get_height() // 2 - 10,
                                                self.new_game_text.get_width() + 20,
                                                self.new_game_text.get_height() + 20)
+        self.exit_rect = pygame.rect.Rect(Level.width // 2 - self.exit_text.get_width() // 2 - 10,
+                                               Level.height // (3 / 2) - self.exit_text.get_height() // 2 + 50,
+                                               self.exit_text.get_width() + 20,
+                                               self.exit_text.get_height() + 20)
         high_score = self.get_high_score()
         self.window.fill(RED)
         if self.player.score > high_score:
-            high_score_text = MAIN_FONT.render("New High Score! You lasted " + str(self.player.score) + " seconds", True, BLACK)
-            self.window.blit(high_score_text, (Level.width//2 - high_score_text.get_width()//2, (Level.height // 2)))
+            high_score_text = MAIN_FONT.render("New High Score! You lasted " + str(self.player.score) + " seconds",
+                                               True, BLACK)
+            self.window.blit(high_score_text,
+                             (Level.width // 2 - high_score_text.get_width() // 2, (Level.height // 2)))
             self.record_new_high_score()
         else:
             high_score_text = MAIN_FONT.render("High Score: " + str(high_score) + " seconds", True, BLACK)
-            self.window.blit(score_text, (Level.width//2 - score_text.get_width()//2,  (Level.height//2)))
-            self.window.blit(high_score_text, ((Level.width//2 - high_score_text.get_width()//2), Level.height//2 + high_score_text.get_height()))
+            self.window.blit(score_text, (Level.width // 2 - score_text.get_width() // 2, (Level.height // 2)))
+            self.window.blit(high_score_text, (
+                (Level.width // 2 - high_score_text.get_width() // 2),
+                Level.height // 2 + high_score_text.get_height()))
         self.window.blit(game_over_text, (
-        (Level.width // 2 - game_over_text.get_width() // 2), (Level.height // 2 - game_over_text.get_height())))
+            (Level.width // 2 - game_over_text.get_width() // 2), (Level.height // 2 - game_over_text.get_height())))
         pygame.draw.rect(self.window, WHITE, self.game_over_rect)
+        pygame.draw.rect(self.window, WHITE, self.exit_rect)
         self.window.blit(self.new_game_text, (self.game_over_rect[0] + 10, self.game_over_rect[1] + 10))
+        self.window.blit(self.exit_text, (self.exit_rect[0] + 10, self.exit_rect[1] + 10))
         pygame.display.update()
 
     def record_new_high_score(self):

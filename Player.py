@@ -1,18 +1,21 @@
 import pygame
+from Bullet import Bullet
 
-BLACK = (0,0,0)
+BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-class Player():
+
+class Player:
     xp_to_level_up = 3
     colour = BLACK
 
     def __init__(self, x, y, width, height, speed, att_speed, hp):
         self.speed = speed
         self.att_speed = att_speed
+        self.bullet_cd = att_speed
         self.rect = pygame.Rect(x, y, width, height)
         self.max_hp = hp
         self.hp = hp
@@ -31,21 +34,37 @@ class Player():
     def move(self, keys_pressed, level):
         if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed > 0:
             pygame.Rect.move_ip(self.rect, -self.speed, 0)
-        if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and self.rect[0] + self.speed + self.rect[2] < level.width:
+        if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and self.rect[0] + self.speed + self.rect[
+                2] < level.width:
             pygame.Rect.move_ip(self.rect, self.speed, 0)
         if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and self.rect[1] - self.speed > 0:
             pygame.Rect.move_ip(self.rect, 0, -self.speed)
-        if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and self.rect[1] + self.speed + self.rect[3] < level.height:
+        if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and self.rect[1] + self.speed + self.rect[
+                3] < level.height:
             pygame.Rect.move_ip(self.rect, 0, self.speed)
 
     def draw_health_bar(self, level):
-        health_rect = (self.rect[0], self.rect[1] - 10, self.rect[2] * (self.hp/self.max_hp), 5)
+        health_rect = (self.rect[0], self.rect[1] - 10, self.rect[2] * (self.hp / self.max_hp), 5)
         pygame.draw.rect(level.window, RED, (self.rect[0], self.rect[1] - 10, self.rect[2], 5))
         pygame.draw.rect(level.window, GREEN, health_rect)
 
     def draw_xp_bar(self, level):
         xp_rect = (5, 5, ((level.width - 10) * (self.xp / self.xp_to_level_up)), 5)
         pygame.draw.rect(level.window, BLACK, xp_rect)
+
+    def bullet_cooldown(self):
+        if pygame.time.get_ticks() - self.bullet_cd >= self.att_speed:
+            print(pygame.time.get_ticks() - self.bullet_cd)
+            self.bullet_cd = pygame.time.get_ticks()
+            return True
+        return False
+
+    def shoot(self, level):
+        bullet = Bullet(self.rect[0] + (self.rect[2] // 2) - Bullet.width // 2,
+                    self.rect[1] + (self.rect[3]// 2) - Bullet.height // 2, self)
+        level.bullets.append(bullet)
+        level.targeting(bullet)
+        level.player.cd = 0
 
     def player_collided(self):
         if self.collided > 0:
@@ -63,7 +82,6 @@ class Player():
     def check_level_up(self):
         if self.xp >= self.xp_to_level_up:
             self.level_up()
-
 
     def level_up(self):
         self.bullet_damage = round(self.bullet_damage * 1.1, 2)
