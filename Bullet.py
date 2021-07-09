@@ -1,7 +1,5 @@
 import pygame
 
-pygame.init()
-
 class Bullet():
     width = 6
     height = 6

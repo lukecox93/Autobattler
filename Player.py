@@ -6,8 +6,6 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
-pygame.init()
-
 class Player():
     xp_to_level_up = 3
     colour = BLACK

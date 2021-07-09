@@ -4,6 +4,7 @@ import sys
 from Enemy import Enemy
 from Bullet import Bullet
 from Player import Player
+from Basic_Enemy import Basic_enemy
 
 pygame.font.init()
 
@@ -14,8 +15,6 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
 MAIN_FONT = pygame.font.SysFont("Verdana", 30)
-
-pygame.init()
 
 class Level():
     width = 1920

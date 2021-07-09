@@ -2,7 +2,6 @@ import pygame
 from Player import Player
 from Level import Level
 import os.path
-from Enemy import Enemy
 
 
 BLACK = (0,0,0)
@@ -19,7 +18,7 @@ def main():
         with open("High score.txt", "w") as file:
             file.write("0")
     clock = pygame.time.Clock()
-    player = Player(935, 515, 50, 50, 5, 1, 1)
+    player = Player(Level.width//2 - 25, Level.height//2 - 25, 50, 50, 5, 1, 1)
     level_1 = Level(player)
     level_1.events(player)
     while level_1.run:
