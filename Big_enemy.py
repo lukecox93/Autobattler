@@ -8,6 +8,8 @@ class BigEnemy(Enemy):
         super().__init__(level)
         self.width = 40
         self.height = 40
+        self.x = random.randint(0, level.width - self.width)
+        self.y = random.randint(0, level.height - self.height)
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.speed = 2
         self.damage = 4

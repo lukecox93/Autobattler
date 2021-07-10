@@ -6,8 +6,6 @@ RED = (255, 0, 0)
 
 class Enemy:
     def __init__(self, level):
-        self.x = random.randint(0, level.width)
-        self.y = random.randint(0, level.height)
         self.target = level.player
         self.delta_x = 0
         self.delta_y = 0

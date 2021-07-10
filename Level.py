@@ -4,6 +4,7 @@ import sys
 from Player import Player
 from Basic_enemy import BasicEnemy
 from Big_enemy import BigEnemy
+from Drop import Drop
 
 pygame.font.init()
 
@@ -27,12 +28,14 @@ class Level:
         self.spawn_big_enemy = pygame.USEREVENT + 2
         self.increase_spawn_rate = pygame.USEREVENT + 3
         self.increase_score = pygame.USEREVENT + 4
+        self.spawn_drop = pygame.USEREVENT + 5
         self.player = player
         self.window = pygame.display.set_mode((Level.width, Level.height))
         self.fps = 60
         self.enemies = []
         self.bullets = []
         self.targets = []
+        self.drops = []
         self.run = True
         self.enemy_spawn_rate = 1
         self.gameover = False
@@ -40,12 +43,12 @@ class Level:
 
     def draw_game(self):
         self.window.fill(WHITE)
-        health_text = MAIN_FONT.render("HP: " + str(self.player.hp), True, BLACK)
-        self.window.blit(health_text, (Level.width - health_text.get_width() - 10, 10))
         for enemy in self.enemies:
             enemy.draw(self)
         for bullet in self.bullets:
             bullet.draw(self)
+        for drop in self.drops:
+            drop.draw(self)
         pygame.draw.rect(self.window, self.player.colour, self.player.rect)
         self.player.draw_health_bar(self)
         self.player.draw_xp_bar(self)
@@ -53,15 +56,17 @@ class Level:
 
     def events(self):
         pygame.time.set_timer(self.spawn_basic_enemy, 1000 // self.enemy_spawn_rate)
-        pygame.time.set_timer(self.spawn_big_enemy, 4000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_big_enemy, 10000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
         pygame.time.set_timer(self.increase_score, 1000)
+        pygame.time.set_timer(self.spawn_drop, 500)
 
     def pause_events(self):
         pygame.time.set_timer(self.spawn_basic_enemy, 0)
         pygame.time.set_timer(self.spawn_big_enemy, 0)
         pygame.time.set_timer(self.increase_spawn_rate, 0)
         pygame.time.set_timer(self.increase_score, 0)
+        pygame.time.set_timer(self.spawn_drop, 0)
 
     def event_handler(self):
         events = pygame.event.get()
@@ -74,28 +79,43 @@ class Level:
                     self.run = False
                     sys.exit()
             if event.type == pygame.USEREVENT + 1:
-                enemy = BasicEnemy(self)
+                enemy = self.spawn(BasicEnemy)
                 self.enemies.append(enemy)
             if event.type == pygame.USEREVENT + 2:
-                enemy = BigEnemy(self)
+                enemy = self.spawn(BigEnemy)
                 self.enemies.append(enemy)
             if event.type == pygame.USEREVENT + 3:
                 self.enemy_spawn_rate += 1
             if event.type == pygame.USEREVENT + 4:
                 self.player.score += 1
-            if self.gameover:
-                if pygame.Rect.collidepoint(self.game_over_rect, pygame.mouse.get_pos()):
-                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
-                        self.gameover = False
-                elif pygame.Rect.collidepoint(self.exit_rect, pygame.mouse.get_pos()):
-                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
-                        sys.exit()
-                else:
+            if event.type == pygame.USEREVENT + 5:
+                drop = self.spawn(Drop)
+                self.drops.append(drop)
+
+    def game_over_event_handler(self):
+        for event in pygame.event.get():
+            if pygame.Rect.collidepoint(self.game_over_rect, pygame.mouse.get_pos()):
+                pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
+                if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                    self.gameover = False
+            elif pygame.Rect.collidepoint(self.exit_rect, pygame.mouse.get_pos()):
+                pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                    sys.exit()
+            else:
+                pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+    def spawn(self, thing_to_spawn):
+        drop = thing_to_spawn(self)
+        drop = self.check_location(drop, thing_to_spawn)
+        return drop
+
+    def check_location(self, drop, thing_to_spawn):
+        if pygame.Rect.colliderect(drop.rect, self.player.rect):
+            drop = self.spawn(thing_to_spawn)
+        return drop
 
     def target_finder(self):
         targets = []
@@ -132,7 +152,7 @@ class Level:
         self.player.xp += enemy.given_xp
         self.enemies.remove(enemy)
 
-    def player_collision(self):
+    def player_enemy_collision(self):
         collision = pygame.Rect.collidelist(self.player.rect, self.enemies)
         if collision >= 0:
             self.player.hp -= self.enemies[collision].damage
@@ -146,6 +166,11 @@ class Level:
                 self.enemies[collision].speed = -self.enemies[collision].speed * 2
             return self.player.check_hp()
 
+    def drop_collision(self):
+        collision = pygame.Rect.collidelist(self.player.rect, self.drops)
+        if collision >= 0:
+            Player.colour = GREEN
+
     def get_high_score(self):
         with open("High score.txt", "r") as file:
             high_score = int(file.read())
@@ -158,7 +183,7 @@ class Level:
         self.draw_game_over_screen()
         self.gameover = True
         while self.gameover:
-            self.event_handler()
+            self.game_over_event_handler()
 
     def draw_game_over_screen(self):
         score_text = MAIN_FONT.render("You lasted " + str(self.player.score) + " seconds", True, BLACK)
@@ -169,8 +194,7 @@ class Level:
                                                self.new_game_text.get_height() + 20)
         self.exit_rect = pygame.rect.Rect(Level.width // 2 - self.exit_text.get_width() // 2 - 10,
                                                Level.height // (3 / 2) - self.exit_text.get_height() // 2 + 50,
-                                               self.exit_text.get_width() + 20,
-                                               self.exit_text.get_height() + 20)
+                                               self.exit_text.get_width() + 20, self.exit_text.get_height() + 20)
         high_score = self.get_high_score()
         self.window.fill(RED)
         if self.player.score > high_score:

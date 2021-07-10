@@ -2,6 +2,8 @@ import pygame
 from Player import Player
 from Level import Level
 import os.path
+from Drop import Drop
+import random
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -10,7 +12,6 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
 pygame.display.set_caption("Autobattler")
-
 
 def main():
     pygame.init()
@@ -31,7 +32,8 @@ def main():
         keys_pressed = pygame.key.get_pressed()
         player.move(keys_pressed, level_1)
         level_1.bullet_collision()
-        if level_1.player_collision():
+        level_1.drop_collision()
+        if level_1.player_enemy_collision():
             level_1.game_over()
             main()
         level_1.player.check_level_up()

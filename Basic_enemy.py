@@ -8,6 +8,8 @@ class BasicEnemy(Enemy):
         super().__init__(level)
         self.width = 20
         self.height = 20
+        self.x = random.randint(0, level.width - self.width)
+        self.y = random.randint(0, level.height - self.height)
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.speed = 4
         self.damage = 1

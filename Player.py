@@ -54,7 +54,6 @@ class Player:
 
     def bullet_cooldown(self):
         if pygame.time.get_ticks() - self.bullet_cd >= self.att_speed:
-            print(pygame.time.get_ticks() - self.bullet_cd)
             self.bullet_cd = pygame.time.get_ticks()
             return True
         return False
