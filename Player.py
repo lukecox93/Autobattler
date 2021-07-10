@@ -30,6 +30,8 @@ class Player:
         self.xp = 0
         self.xp_to_level_up = (Player.xp_to_level_up * self.level)
         self.score = 0
+        self.colour = Player.colour
+        self.temp_buff = 0
 
     def move(self, keys_pressed, level):
         if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed > 0:
@@ -53,7 +55,7 @@ class Player:
         pygame.draw.rect(level.window, BLACK, xp_rect)
 
     def bullet_cooldown(self):
-        if pygame.time.get_ticks() - self.bullet_cd >= self.att_speed:
+        if pygame.time.get_ticks() - self.bullet_cd >= 1000/self.att_speed:
             self.bullet_cd = pygame.time.get_ticks()
             return True
         return False

@@ -4,7 +4,7 @@ import sys
 from Player import Player
 from Basic_enemy import BasicEnemy
 from Big_enemy import BigEnemy
-from Drop import Drop
+from Buffs import *
 
 pygame.font.init()
 
@@ -35,7 +35,8 @@ class Level:
         self.enemies = []
         self.bullets = []
         self.targets = []
-        self.drops = []
+        self.buffs = []
+        self.available_buffs =(HealthPack, AttackSpeedBuff, AttackDamageBuff, TempAttackSpeedBuff, TempAttackDamageBuff)
         self.run = True
         self.enemy_spawn_rate = 1
         self.gameover = False
@@ -47,8 +48,8 @@ class Level:
             enemy.draw(self)
         for bullet in self.bullets:
             bullet.draw(self)
-        for drop in self.drops:
-            drop.draw(self)
+        for buff in self.buffs:
+            buff.draw(self)
         pygame.draw.rect(self.window, self.player.colour, self.player.rect)
         self.player.draw_health_bar(self)
         self.player.draw_xp_bar(self)
@@ -89,8 +90,8 @@ class Level:
             if event.type == pygame.USEREVENT + 4:
                 self.player.score += 1
             if event.type == pygame.USEREVENT + 5:
-                drop = self.spawn(Drop)
-                self.drops.append(drop)
+                drop = self.spawn(random.choice(self.available_buffs))
+                self.buffs.append(drop)
 
     def game_over_event_handler(self):
         for event in pygame.event.get():
@@ -167,9 +168,11 @@ class Level:
             return self.player.check_hp()
 
     def drop_collision(self):
-        collision = pygame.Rect.collidelist(self.player.rect, self.drops)
+        collision = pygame.Rect.collidelist(self.player.rect, self.buffs)
         if collision >= 0:
-            Player.colour = GREEN
+            self.buffs[collision].effect(self)
+            del self.buffs[collision]
+
 
     def get_high_score(self):
         with open("High score.txt", "r") as file:
