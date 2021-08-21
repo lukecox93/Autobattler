@@ -18,15 +18,15 @@ def main():
         with open("High score.txt", "w") as file:
             file.write("0")
     clock = pygame.time.Clock()
-    player = Player(Level.width // 2 - 25, Level.height // 2 - 25, 50, 50, 5, 1, 10)
-    level_1 = Level(player)
-    level_1.events()
     menu_1 = menu()
+    fps = 60
     while menu_1.run:
-        clock.tick(level_1.fps)
+        clock.tick(fps)
         menu_1.draw_menu()
         menu_1.event_handler()
-    pygame.quit()
+    player = Player(Level.width // 2 - 25, Level.height // 2 - 25, 50, 50, 5, 1, 10)
+    level_1 = Level(player, menu_1.difficulty_level)
+    level_1.events()
     while level_1.run:
         clock.tick(level_1.fps)
         level_1.event_handler()

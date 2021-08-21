@@ -21,7 +21,7 @@ class Level:
     width = 1920
     height = 1080
 
-    def __init__(self, player):
+    def __init__(self, player, modifier):
         self.new_game_text = MAIN_FONT.render("Try again", True, BLACK)
         self.exit_text = MAIN_FONT.render("Quit", True, BLACK)
         self.spawn_basic_enemy = pygame.USEREVENT + 1
@@ -41,6 +41,7 @@ class Level:
         self.enemy_spawn_rate = 1
         self.gameover = False
         self.game_over_rect = None
+        self.modifier = modifier
 
     def draw_game(self):
         self.window.fill(WHITE)

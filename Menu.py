@@ -1,6 +1,5 @@
 import pygame
 import sys
-from Arrow import arrow
 
 
 BLACK = (0, 0, 0)
@@ -20,12 +19,22 @@ class menu:
         self.difficulty_level = 1
         self.difficulty_rect = None
         self.run = True
-        self.arrows = []
+        self.buttons = []
 
     def create_arrow(self, effect, position):
-        obj = arrow(effect, position, self)
-        self.arrows.append(obj)
-        obj.draw()
+        button = arrow(effect, position, self)
+        self.buttons.append(button)
+        button.draw()
+
+    def create_start_button(self):
+        button = start_button(self)
+        self.buttons.append(button)
+        button.draw()
+
+    def create_exit_button(self):
+        button = exit_button(self)
+        self.buttons.append(button)
+        button.draw()
 
 
     def event_handler(self):
@@ -39,12 +48,11 @@ class menu:
                 if event.key == pygame.K_ESCAPE:
                     self.run = False
                     sys.exit()
-            mouse_over = pygame.Rect.collidelist(mouse, self.arrows)
+            mouse_over = pygame.Rect.collidelist(mouse, self.buttons)
             if mouse_over >= 0:
                 pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if (10 > self.difficulty_level + self.arrows[mouse_over].effect > 0):
-                        self.difficulty_level += self.arrows[mouse_over].effect
+                    self.buttons[mouse_over].event()
                     pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
             else:
                 pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
@@ -61,4 +69,51 @@ class menu:
             (menu.width // 2 - difficulty_text.get_width() // 2), (menu.height // 2 - difficulty_text.get_height())))
         self.create_arrow(1, (menu.width // 2, menu.height // 2))
         self.create_arrow(-1, (menu.width // 2, menu.height // 2 + 40))
+        self.create_start_button()
+        self.create_exit_button()
         pygame.display.update()
+
+class arrow:
+    width = 20
+    height = 20
+
+    def __init__(self, effect, position, screen):
+        self.effect = effect
+        self.rect = pygame.Rect(position, (arrow.width, arrow.height))
+        self.screen = screen
+
+
+    def draw(self):
+        pygame.draw.rect(self.screen.window, BLACK, self.rect)
+
+    def event(self):
+        if 0 < self.screen.difficulty_level + self.effect < 10:
+            self.screen.difficulty_level += self.effect
+
+class start_button:
+    def __init__(self, screen):
+        self.text = MAIN_FONT.render("Start Game", True, BLACK)
+        self.rect = (screen.width // 2 - self.text.get_width() // 2, screen.height // 2 - self.text.get_height() + 120, self.text.get_width(), self.text.get_height())
+        self.screen = screen
+
+    def draw(self):
+        pygame.draw.rect(self.screen.window, RED, self.rect)
+        self.screen.window.blit(self.text, ((self.screen.width // 2 - self.text.get_width() // 2), (self.screen.height // 2 - self.text.get_height() + 120)))
+
+    def event(self):
+        self.screen.run = False
+
+class exit_button:
+    def __init__(self, screen):
+        self.text = MAIN_FONT.render("Exit Game", True, BLACK)
+        self.screen = screen
+        self.rect = pygame.rect.Rect(screen.width // 2 - self.text.get_width() // 2,
+                                               screen.height // (3 / 2) - self.text.get_height() // 2,
+                                               self.text.get_width(), self.text.get_height())
+
+    def draw(self):
+        pygame.draw.rect(self.screen.window, RED, self.rect)
+        self.screen.window.blit(self.text, (self.rect))
+
+    def event(self):
+        sys.exit()
