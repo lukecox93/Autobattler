@@ -167,7 +167,7 @@ class Level:
                 self.enemies[collision].speed = -self.enemies[collision].speed * 2
             return self.player.check_hp()
 
-    def drop_collision(self):
+    def buff_collision(self):
         collision = pygame.Rect.collidelist(self.player.rect, self.buffs)
         if collision >= 0:
             self.buffs[collision].effect(self)
