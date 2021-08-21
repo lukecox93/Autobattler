@@ -12,6 +12,7 @@ class Buff:
         self.x = random.randint(0, level.width - self.width)
         self.y = random.randint(0, level.height - self.height)
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.time_left = 10000000000000000000000
 
     def draw(self, level):
         pygame.draw.rect(level.window, self.colour, self.rect)
@@ -52,19 +53,23 @@ class TempAttackSpeedBuff(Buff):
     def __init__(self, level):
         super().__init__(level)
         self.colour = (255, 165, 0)
+        self.time_left = 5
 
     def effect(self, level):
         level.player.att_speed *= 3
-        # TODO - need to work out how to time the buff
-        level.player.temp_buff = 1
+
+    def remove_effect(self, level):
+        level.player.att_speed /= 3
 
 
 class TempAttackDamageBuff(Buff):
     def __init__(self, level):
         super().__init__(level)
         self.colour = (255, 255, 0)
+        self.time_left = 5
 
     def effect(self, level):
         level.player.bullet_damage *= 3
-        # TODO - need to work out how to time the buff
-        level.player.temp_buff = 1
+
+    def remove_effect(self, level):
+        level.player.bullet_damage /= 3

@@ -36,6 +36,7 @@ class Level:
         self.bullets = []
         self.targets = []
         self.buffs = []
+        self.taken_buffs = []
         self.available_buffs =(HealthPack, AttackSpeedBuff, AttackDamageBuff, TempAttackSpeedBuff, TempAttackDamageBuff)
         self.run = True
         self.enemy_spawn_rate = 1
@@ -54,6 +55,7 @@ class Level:
         pygame.draw.rect(self.window, self.player.colour, self.player.rect)
         self.player.draw_health_bar(self)
         self.player.draw_xp_bar(self)
+
         pygame.display.update()
 
     def events(self):
@@ -172,8 +174,15 @@ class Level:
         collision = pygame.Rect.collidelist(self.player.rect, self.buffs)
         if collision >= 0:
             self.buffs[collision].effect(self)
+            self.taken_buffs.append(self.buffs[collision])
             del self.buffs[collision]
 
+    def buff_handler(self):
+        for buff in self.taken_buffs:
+            buff.time_left -= 1/self.fps
+            if (buff.time_left) <= 0:
+                buff.remove_effect(self)
+                self.taken_buffs.remove(buff)
 
     def get_high_score(self):
         with open("High score.txt", "r") as file:

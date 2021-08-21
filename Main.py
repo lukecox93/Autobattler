@@ -38,6 +38,7 @@ def main():
         player.move(keys_pressed, level_1)
         level_1.bullet_collision()
         level_1.buff_collision()
+        level_1.buff_handler()
         if level_1.player_enemy_collision():
             level_1.game_over()
             main()
