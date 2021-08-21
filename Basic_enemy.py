@@ -1,7 +1,6 @@
 import pygame
 from Enemy import Enemy
 import random
-import math
 
 
 class BasicEnemy(Enemy):

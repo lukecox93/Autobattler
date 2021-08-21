@@ -21,7 +21,7 @@ class Level:
     width = 1920
     height = 1080
 
-    def __init__(self, player, modifier):
+    def __init__(self, player, menu):
         self.new_game_text = MAIN_FONT.render("Try again", True, BLACK)
         self.exit_text = MAIN_FONT.render("Quit", True, BLACK)
         self.spawn_basic_enemy = pygame.USEREVENT + 1
@@ -37,12 +37,13 @@ class Level:
         self.targets = []
         self.buffs = []
         self.taken_buffs = []
-        self.available_buffs =(HealthPack, AttackSpeedBuff, AttackDamageBuff, TempAttackSpeedBuff, TempAttackDamageBuff)
+        self.available_buffs = (HealthPack, AttackSpeedBuff, AttackDamageBuff, TempAttackSpeedBuff, TempAttackDamageBuff)
         self.run = True
         self.enemy_spawn_rate = 1
         self.gameover = False
         self.game_over_rect = None
-        self.modifier = modifier
+        self.menu = menu
+        self.modifier = menu.difficulty_level
 
     def draw_game(self):
         self.window.fill(WHITE)
@@ -63,7 +64,7 @@ class Level:
         pygame.time.set_timer(self.spawn_big_enemy, 10000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
         pygame.time.set_timer(self.increase_score, 1000)
-        pygame.time.set_timer(self.spawn_drop, 500)
+        pygame.time.set_timer(self.spawn_drop, 5000)
 
     def pause_events(self):
         pygame.time.set_timer(self.spawn_basic_enemy, 0)
@@ -81,7 +82,7 @@ class Level:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.run = False
-                    sys.exit()
+                    self.menu.run = True
             if event.type == pygame.USEREVENT + 1:
                 enemy = self.spawn(BasicEnemy)
                 self.enemies.append(enemy)
