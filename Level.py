@@ -200,6 +200,7 @@ class Level:
             self.game_over_event_handler()
 
     def draw_game_over_screen(self):
+        # TODO - move to separate file, tidy up methods. This method is far too big and complicated
         score_text = MAIN_FONT.render("You lasted " + str(self.player.score) + " seconds", True, BLACK)
         game_over_text = MAIN_FONT.render("Game Over!", True, BLACK)
         self.game_over_rect = pygame.rect.Rect(Level.width // 2 - self.new_game_text.get_width() // 2 - 10,
