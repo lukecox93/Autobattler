@@ -22,8 +22,6 @@ class Level:
     height = 1080
 
     def __init__(self, player, menu):
-        self.new_game_text = MAIN_FONT.render("Try again", True, BLACK)
-        self.exit_text = MAIN_FONT.render("Quit", True, BLACK)
         self.spawn_basic_enemy = pygame.USEREVENT + 1
         self.spawn_big_enemy = pygame.USEREVENT + 2
         self.increase_spawn_rate = pygame.USEREVENT + 3
@@ -41,7 +39,6 @@ class Level:
         self.run = True
         self.enemy_spawn_rate = 1
         self.gameover = False
-        self.game_over_rect = None
         self.menu = menu
         self.modifier = menu.difficulty_level
 
@@ -56,7 +53,6 @@ class Level:
         pygame.draw.rect(self.window, self.player.colour, self.player.rect)
         self.player.draw_health_bar(self)
         self.player.draw_xp_bar(self)
-
         pygame.display.update()
 
     def events(self):
@@ -81,6 +77,7 @@ class Level:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
+                    self.pause_events()
                     self.run = False
                     self.menu.run = True
             if event.type == pygame.USEREVENT + 1:
@@ -96,21 +93,6 @@ class Level:
             if event.type == pygame.USEREVENT + 5:
                 drop = self.spawn(random.choice(self.available_buffs))
                 self.buffs.append(drop)
-
-    def game_over_event_handler(self):
-        for event in pygame.event.get():
-            if pygame.Rect.collidepoint(self.game_over_rect, pygame.mouse.get_pos()):
-                pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
-                    self.gameover = False
-            elif pygame.Rect.collidepoint(self.exit_rect, pygame.mouse.get_pos()):
-                pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
-                    sys.exit()
-            else:
-                pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
     def spawn(self, thing_to_spawn):
         drop = thing_to_spawn(self)
@@ -185,53 +167,7 @@ class Level:
                 buff.remove_effect(self)
                 self.taken_buffs.remove(buff)
 
-    def get_high_score(self):
-        with open("High score.txt", "r") as file:
-            high_score = int(file.read())
-            return high_score
 
-    def game_over(self):
-        self.pause_events()
-        self.enemies = []
-        self.bullets = []
-        self.draw_game_over_screen()
-        self.gameover = True
-        while self.gameover:
-            self.game_over_event_handler()
 
-    def draw_game_over_screen(self):
-        # TODO - move to separate file, tidy up methods. This method is far too big and complicated
-        score_text = MAIN_FONT.render("You lasted " + str(self.player.score) + " seconds", True, BLACK)
-        game_over_text = MAIN_FONT.render("Game Over!", True, BLACK)
-        self.game_over_rect = pygame.rect.Rect(Level.width // 2 - self.new_game_text.get_width() // 2 - 10,
-                                               Level.height // (3 / 2) - self.new_game_text.get_height() // 2 - 10,
-                                               self.new_game_text.get_width() + 20,
-                                               self.new_game_text.get_height() + 20)
-        self.exit_rect = pygame.rect.Rect(Level.width // 2 - self.exit_text.get_width() // 2 - 10,
-                                               Level.height // (3 / 2) - self.exit_text.get_height() // 2 + 50,
-                                               self.exit_text.get_width() + 20, self.exit_text.get_height() + 20)
-        high_score = self.get_high_score()
-        self.window.fill(RED)
-        if self.player.score > high_score:
-            high_score_text = MAIN_FONT.render("New High Score! You lasted " + str(self.player.score) + " seconds",
-                                               True, BLACK)
-            self.window.blit(high_score_text,
-                             (Level.width // 2 - high_score_text.get_width() // 2, (Level.height // 2)))
-            self.record_new_high_score()
-        else:
-            high_score_text = MAIN_FONT.render("High Score: " + str(high_score) + " seconds", True, BLACK)
-            self.window.blit(score_text, (Level.width // 2 - score_text.get_width() // 2, (Level.height // 2)))
-            self.window.blit(high_score_text, (
-                (Level.width // 2 - high_score_text.get_width() // 2),
-                Level.height // 2 + high_score_text.get_height()))
-        self.window.blit(game_over_text, (
-            (Level.width // 2 - game_over_text.get_width() // 2), (Level.height // 2 - game_over_text.get_height())))
-        pygame.draw.rect(self.window, WHITE, self.game_over_rect)
-        pygame.draw.rect(self.window, WHITE, self.exit_rect)
-        self.window.blit(self.new_game_text, (self.game_over_rect[0] + 10, self.game_over_rect[1] + 10))
-        self.window.blit(self.exit_text, (self.exit_rect[0] + 10, self.exit_rect[1] + 10))
-        pygame.display.update()
 
-    def record_new_high_score(self):
-        with open("High score.txt", "w") as file:
-            file.write(str(self.player.score))
+

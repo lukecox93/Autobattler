@@ -1,7 +1,8 @@
 import pygame
 from Player import Player
 from Level import Level
-from Menu import menu
+from Menu import Menu
+from Game_Over import GameOver
 import os.path
 
 BLACK = (0, 0, 0)
@@ -18,7 +19,7 @@ def main():
         with open("High score.txt", "w") as file:
             file.write("0")
     clock = pygame.time.Clock()
-    menu_1 = menu()
+    menu_1 = Menu()
     fps = 60
     while True:
         while menu_1.run:
@@ -41,11 +42,12 @@ def main():
             level_1.buff_collision()
             level_1.buff_handler()
             if level_1.player_enemy_collision():
-                level_1.game_over()
+                game_over = GameOver(level_1)
+                while game_over.run:
+                    game_over.event_handler()
+                    game_over.draw()
                 main()
             level_1.player.check_level_up()
-
-    pygame.quit()
 
 
 if __name__ == "__main__":

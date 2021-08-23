@@ -10,12 +10,12 @@ GREEN = (0, 255, 0)
 
 MAIN_FONT = pygame.font.SysFont("Verdana", 30)
 
-class menu:
+class Menu:
     width = 1920
     height = 1080
 
     def __init__(self):
-        self.window = pygame.display.set_mode((menu.width, menu.height))
+        self.window = pygame.display.set_mode((Menu.width, Menu.height))
         self.difficulty_level = 1
         self.difficulty_rect = None
         self.run = True
@@ -61,14 +61,14 @@ class menu:
     def draw_menu(self):
         difficulty_text = MAIN_FONT.render("Difficulty: " + str(self.difficulty_level), True, BLACK)
         self.window.fill(WHITE)
-        self.difficulty_rect = pygame.rect.Rect(menu.width // 2 - difficulty_text.get_width() // 2 - 10,
-                                               menu.height // (3 / 2) - difficulty_text.get_height() // 2 - 10,
+        self.difficulty_rect = pygame.rect.Rect(Menu.width // 2 - difficulty_text.get_width() // 2 - 10,
+                                               Menu.height // (3 / 2) - difficulty_text.get_height() // 2 - 10,
                                                difficulty_text.get_width() + 20,
                                                difficulty_text.get_height() + 20)
         self.window.blit(difficulty_text, (
-            (menu.width // 2 - difficulty_text.get_width() // 2), (menu.height // 2 - difficulty_text.get_height())))
-        self.create_arrow(1, (menu.width // 2, menu.height // 2))
-        self.create_arrow(-1, (menu.width // 2, menu.height // 2 + 40))
+            (Menu.width // 2 - difficulty_text.get_width() // 2), (Menu.height // 2 - difficulty_text.get_height())))
+        self.create_arrow(1, (Menu.width // 2, Menu.height // 2))
+        self.create_arrow(-1, (Menu.width // 2, Menu.height // 2 + 40))
         self.create_start_button()
         self.create_exit_button()
         pygame.display.update()
