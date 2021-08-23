@@ -5,12 +5,12 @@ import math
 
 
 class BasicEnemy(Enemy):
-    def __init__(self, level):
-        super().__init__(level)
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
         self.width = 20
         self.height = 20
-        self.x = random.randint(0, level.width - self.width)
-        self.y = random.randint(0, level.height - self.height)
+        self.x = x
+        self.y = y
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.speed = 4
         self.damage = 1 * math.ceil(level.modifier / 2)

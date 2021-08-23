@@ -9,6 +9,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
+
 class GameOver:
 
     def __init__(self, level):
@@ -40,7 +41,8 @@ class GameOver:
         self.window.fill(RED)
         self.display_high_score()
         self.window.blit(game_over_text, (
-            (self.level.width // 2 - game_over_text.get_width() // 2), (self.level.height // 2 - game_over_text.get_height())))
+            (self.level.width // 2 - game_over_text.get_width() // 2),
+            (self.level.height // 2 - game_over_text.get_height())))
         pygame.draw.rect(self.window, WHITE, self.game_over_rect)
         pygame.draw.rect(self.window, WHITE, self.exit_rect)
         self.window.blit(self.new_game_text, (self.game_over_rect[0] + 10, self.game_over_rect[1] + 10))
@@ -51,14 +53,16 @@ class GameOver:
         score_text = MAIN_FONT.render("You lasted " + str(self.level.player.score) + " seconds", True, BLACK)
         high_score = self.get_high_score()
         if self.level.player.score > high_score:
-            high_score_text = MAIN_FONT.render("New High Score! You lasted " + str(self.level.player.score) + " seconds",
-                                               True, BLACK)
+            high_score_text = MAIN_FONT.render(
+                "New High Score! You lasted " + str(self.level.player.score) + " seconds",
+                True, BLACK)
             self.window.blit(high_score_text,
                              (self.level.width // 2 - high_score_text.get_width() // 2, (self.level.height // 2)))
             self.record_new_high_score()
         else:
             high_score_text = MAIN_FONT.render("High Score: " + str(high_score) + " seconds", True, BLACK)
-            self.window.blit(score_text, (self.level.width // 2 - score_text.get_width() // 2, (self.level.height // 2)))
+            self.window.blit(score_text,
+                             (self.level.width // 2 - score_text.get_width() // 2, (self.level.height // 2)))
             self.window.blit(high_score_text, (
                 (self.level.width // 2 - high_score_text.get_width() // 2),
                 self.level.height // 2 + high_score_text.get_height()))

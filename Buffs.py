@@ -5,12 +5,12 @@ GREEN = (0, 255, 0)
 
 
 class Buff:
-    def __init__(self, level):
+    def __init__(self, level, x, y):
         self.colour = (0, 0, 0)
         self.width = 10
         self.height = 10
-        self.x = random.randint(0, level.width - self.width)
-        self.y = random.randint(0, level.height - self.height)
+        self.x = x
+        self.y = y
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.time_left = 10000000000000000000000
 
@@ -19,8 +19,8 @@ class Buff:
 
 
 class HealthPack(Buff):
-    def __init__(self, level):
-        super().__init__(level)
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
         self.colour = (255, 0, 0)
         self.hp_given = 5
 
@@ -32,8 +32,8 @@ class HealthPack(Buff):
 
 
 class AttackSpeedBuff(Buff):
-    def __init__(self, level):
-        super().__init__(level)
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
         self.colour = (0, 0, 255)
 
     def effect(self, level):
@@ -41,8 +41,8 @@ class AttackSpeedBuff(Buff):
 
 
 class AttackDamageBuff(Buff):
-    def __init__(self, level):
-        super().__init__(level)
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
         self.colour = (0, 255, 0)
 
     def effect(self, level):
@@ -50,8 +50,8 @@ class AttackDamageBuff(Buff):
 
 
 class TempAttackSpeedBuff(Buff):
-    def __init__(self, level):
-        super().__init__(level)
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
         self.colour = (255, 165, 0)
         self.time_left = 5
 
@@ -63,8 +63,8 @@ class TempAttackSpeedBuff(Buff):
 
 
 class TempAttackDamageBuff(Buff):
-    def __init__(self, level):
-        super().__init__(level)
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
         self.colour = (255, 255, 0)
         self.time_left = 5
 

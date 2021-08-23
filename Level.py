@@ -1,9 +1,11 @@
 import pygame
 import math
 import sys
+import random
 from Player import Player
 from Basic_enemy import BasicEnemy
 from Big_enemy import BigEnemy
+from Multi_enemy import MultiEnemy
 from Buffs import *
 
 pygame.font.init()
@@ -27,6 +29,7 @@ class Level:
         self.increase_spawn_rate = pygame.USEREVENT + 3
         self.increase_score = pygame.USEREVENT + 4
         self.spawn_drop = pygame.USEREVENT + 5
+        self.spawn_multi_enemy = pygame.USEREVENT + 6
         self.player = player
         self.window = pygame.display.set_mode((Level.width, Level.height))
         self.fps = 60
@@ -56,8 +59,9 @@ class Level:
         pygame.display.update()
 
     def events(self):
-        pygame.time.set_timer(self.spawn_basic_enemy, 1000 // self.enemy_spawn_rate)
-        pygame.time.set_timer(self.spawn_big_enemy, 10000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_basic_enemy, 0 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_big_enemy, 0 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_multi_enemy, 5000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
         pygame.time.set_timer(self.increase_score, 1000)
         pygame.time.set_timer(self.spawn_drop, 5000)
@@ -65,6 +69,7 @@ class Level:
     def pause_events(self):
         pygame.time.set_timer(self.spawn_basic_enemy, 0)
         pygame.time.set_timer(self.spawn_big_enemy, 0)
+        pygame.time.set_timer(self.spawn_multi_enemy, 0)
         pygame.time.set_timer(self.increase_spawn_rate, 0)
         pygame.time.set_timer(self.increase_score, 0)
         pygame.time.set_timer(self.spawn_drop, 0)
@@ -93,9 +98,12 @@ class Level:
             if event.type == pygame.USEREVENT + 5:
                 drop = self.spawn(random.choice(self.available_buffs))
                 self.buffs.append(drop)
+            if event.type == pygame.USEREVENT + 6:
+                enemy = self.spawn(MultiEnemy)
+                self.enemies.append(enemy)
 
     def spawn(self, thing_to_spawn):
-        drop = thing_to_spawn(self)
+        drop = thing_to_spawn(self, random.randint(0, Level.width), random.randint(0, Level.height))
         drop = self.check_location(drop, thing_to_spawn)
         return drop
 
@@ -118,7 +126,7 @@ class Level:
 
     def targeting(self, sprite):
         x_dist = ((sprite.target.rect[0] + (sprite.target.rect[2] // 2)) - (sprite.rect[0] + (sprite.rect[2] // 2)))
-        y_dist = (sprite.target.rect[1] + (sprite.target.rect[3] // 2) - (sprite.rect[1] + (sprite.rect[2] // 2)))
+        y_dist = ((sprite.target.rect[1] + (sprite.target.rect[3] // 2)) - (sprite.rect[1] + (sprite.rect[2] // 2)))
 
         sprite.delta_x = round((x_dist * sprite.speed) / (max(abs(x_dist), abs(y_dist))))
         sprite.delta_y = round((y_dist * sprite.speed) / (max(abs(x_dist), abs(y_dist))))
@@ -127,30 +135,18 @@ class Level:
         for bullet in self.bullets:
             collision = pygame.Rect.collidelist(bullet.rect, self.enemies)
             if collision >= 0:
-                self.enemies[collision].hp -= bullet.damage
-                if self.enemies[collision].hp <= 0:
-                    self.enemy_killed(self.enemies[collision])
+                self.enemies[collision].bullet_collision(self, bullet)
                 self.bullets.remove(bullet)
             elif bullet.rect[0] > Level.width or bullet.rect[0] < 0 or bullet.rect[1] > Level.height or \
                     bullet.rect[1] < 0:
                 self.bullets.remove(bullet)
 
-    def enemy_killed(self, enemy):
-        self.player.xp += enemy.given_xp
-        self.enemies.remove(enemy)
-
     def player_enemy_collision(self):
         collision = pygame.Rect.collidelist(self.player.rect, self.enemies)
         if collision >= 0:
-            self.player.hp -= self.enemies[collision].damage
-            self.enemies[collision].hp -= self.player.body_damage
+            self.enemies[collision].collision(self, self.enemies)
             Player.colour = RED
             self.player.collided = 1
-            self.enemies[collision].bounce = 1
-            if self.enemies[collision].hp <= 0:
-                del self.enemies[collision]
-            else:
-                self.enemies[collision].speed = -self.enemies[collision].speed * 2
             return self.player.check_hp()
 
     def buff_collision(self):
