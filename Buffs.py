@@ -47,6 +47,7 @@ class AttackDamageBuff(Buff):
 
     def effect(self, level):
         level.player.bullet_damage += 1
+        # TODO - doesn't seem to have an effect
 
 
 class TempAttackSpeedBuff(Buff):

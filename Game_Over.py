@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 pygame.font.init()
 MAIN_FONT = pygame.font.SysFont("Verdana", 30)

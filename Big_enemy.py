@@ -12,9 +12,10 @@ class BigEnemy(Enemy):
         self.x = random.randint(0, level.width - self.width)
         self.y = random.randint(0, level.height - self.height)
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.original_speed = 2
         self.speed = 2
         self.damage = 4 * math.ceil(level.modifier / 2)
         self.hp = 10 * level.modifier
         self.bounce = 0
-        self.bounciness = 10
+        self.bounciness = 4
         self.given_xp = 15

@@ -1,8 +1,6 @@
 import pygame
 import math
 import sys
-import random
-from Player import Player
 from Basic_enemy import BasicEnemy
 from Big_enemy import BigEnemy
 from Multi_enemy import MultiEnemy
@@ -59,9 +57,9 @@ class Level:
         pygame.display.update()
 
     def events(self):
-        pygame.time.set_timer(self.spawn_basic_enemy, 0 // self.enemy_spawn_rate)
-        pygame.time.set_timer(self.spawn_big_enemy, 0 // self.enemy_spawn_rate)
-        pygame.time.set_timer(self.spawn_multi_enemy, 5000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_basic_enemy, 1000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_big_enemy, 5000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_multi_enemy, 2000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
         pygame.time.set_timer(self.increase_score, 1000)
         pygame.time.set_timer(self.spawn_drop, 5000)
@@ -136,7 +134,6 @@ class Level:
             collision = pygame.Rect.collidelist(bullet.rect, self.enemies)
             if collision >= 0:
                 self.enemies[collision].bullet_collision(self, bullet)
-                self.bullets.remove(bullet)
             elif bullet.rect[0] > Level.width or bullet.rect[0] < 0 or bullet.rect[1] > Level.height or \
                     bullet.rect[1] < 0:
                 self.bullets.remove(bullet)
@@ -144,8 +141,8 @@ class Level:
     def player_enemy_collision(self):
         collision = pygame.Rect.collidelist(self.player.rect, self.enemies)
         if collision >= 0:
-            self.enemies[collision].collision(self, self.enemies)
-            Player.colour = RED
+            self.enemies[collision].player_collision(self, self.enemies)
+            self.player.colour = RED
             self.player.collided = 1
             return self.player.check_hp()
 
