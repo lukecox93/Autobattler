@@ -1,4 +1,3 @@
-import pygame
 import math
 import sys
 from Basic_enemy import BasicEnemy
@@ -36,7 +35,7 @@ class Level:
         self.targets = []
         self.buffs = []
         self.taken_buffs = []
-        self.available_buffs = (HealthPack, AttackSpeedBuff, AttackDamageBuff, TempAttackSpeedBuff, TempAttackDamageBuff)
+        self.available_buffs = (HealthPack, AttackSpeedBuff, AttackDamageBuff, TempAttackSpeedBuff, TempAttackDamageBuff, MoveSpeedBuff, TempMoveSpeedBuff, BulletChaining)
         self.run = True
         self.enemy_spawn_rate = 1
         self.gameover = False
@@ -110,17 +109,17 @@ class Level:
             drop = self.spawn(thing_to_spawn)
         return drop
 
-    def target_finder(self):
+    def target_finder(self, sprite, list_of_targets):
         targets = []
-        for enemy in self.enemies:  # find closest enemy
+        for target in list_of_targets:
             targets.append(math.sqrt(
-                (abs((enemy.rect[0] + enemy.rect[2] // 2) - (self.player.rect[0] + self.player.rect[2] // 2)) ** 2) + (
-                        abs((enemy.rect[1] + enemy.rect[3] // 2) - (self.player.rect[1] + self.player.rect[3] // 2))
+                (abs((target.rect[0] + target.rect[2] // 2) - (sprite.rect[0] + sprite.rect[2] // 2)) ** 2) + (
+                        abs((target.rect[1] + target.rect[3] // 2) - (sprite.rect[1] + sprite.rect[3] // 2))
                         ** 2)))
         if targets:
-            closest_enemy_index = targets.index(min(targets))
-            self.player.target = self.enemies[closest_enemy_index]
-            self.player.shoot(self)
+            sprite.target = list_of_targets[targets.index(min(targets))]
+            return 1
+        return 0
 
     def targeting(self, sprite):
         x_dist = ((sprite.target.rect[0] + (sprite.target.rect[2] // 2)) - (sprite.rect[0] + (sprite.rect[2] // 2)))

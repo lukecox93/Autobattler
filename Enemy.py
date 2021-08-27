@@ -18,6 +18,7 @@ class Enemy:
         self.hp = 0
         self.original_speed = 0
         self.speed = 0
+        self.given_xp = 0
 
     def draw(self, level):
         pygame.draw.rect(level.window, RED, self.rect)
@@ -52,7 +53,7 @@ class Enemy:
         self.hp -= bullet.damage
         if self.hp <= 0:
             self.killed(level, self)
-        level.bullets.remove(bullet)
+        bullet.collision(level)
 
     def killed(self, level, body):
         level.player.xp += self.given_xp

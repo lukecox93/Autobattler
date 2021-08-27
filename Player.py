@@ -22,14 +22,14 @@ class Player:
         self.body_damage = 1
         self.collided = 0
         self.level = 1
-        self.base_bullet_damage = 1
-        self.bullet_damage = self.base_bullet_damage * self.level
+        self.bullet_damage = 1
         self.base_bullet_size = 6
         self.bullet_size = 6
         self.xp = 0
         self.xp_to_level_up = (Player.xp_to_level_up * self.level)
         self.score = 0
         self.colour = Player.colour
+        self.bullet_chain = 0
 
     def move(self, keys_pressed, level):
         if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed > 0:

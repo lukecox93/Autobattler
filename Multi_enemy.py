@@ -64,11 +64,11 @@ class MultiEnemy(Enemy):
         collision = pygame.Rect.collidelist(bullet.rect, self.bodies)
         if collision >= 0:
             self.bodies[collision].hp -= bullet.damage
-            level.bullets.remove(bullet)
             if self.bodies[collision].hp <= 0:
                 self.killed(level, collision)
             if len(self.bodies) == 0:
                 level.enemies.remove(self)
+            bullet.collision(level)
 
     def killed(self, level, body):
         level.player.xp += self.given_xp

@@ -33,7 +33,8 @@ def main():
             clock.tick(level_1.fps)
             level_1.event_handler()
             if player.bullet_cooldown():
-                level_1.target_finder()
+                if level_1.target_finder(level_1.player, level_1.enemies) >= 1:
+                    level_1.player.shoot(level_1)
             level_1.draw_game()
             level_1.player.player_collided()
             keys_pressed = pygame.key.get_pressed()

@@ -57,11 +57,10 @@ class TempAttackSpeedBuff(Buff):
         self.time_left = 5
 
     def effect(self, level):
-        level.player.att_speed *= 3
+        level.player.att_speed = round(level.player.att_speed * 3, 2)
 
     def remove_effect(self, level):
-        level.player.att_speed /= 3
-
+        level.player.att_speed = round(level.player.att_speed / 3, 2)
 
 class TempAttackDamageBuff(Buff):
     def __init__(self, level, x, y):
@@ -70,7 +69,35 @@ class TempAttackDamageBuff(Buff):
         self.time_left = 5
 
     def effect(self, level):
-        level.player.bullet_damage *= 3
+        level.player.bullet_damage = round(level.player.bullet_damage * 3, 2)
 
     def remove_effect(self, level):
-        level.player.bullet_damage /= 3
+        level.player.bullet_damage = round(level.player.bullet_damage / 3, 2)
+
+class MoveSpeedBuff(Buff):
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
+        self.colour = (0, 0, 0)
+
+    def effect(self, level):
+        level.player.speed += 1
+
+class TempMoveSpeedBuff(Buff):
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
+        self.colour = (100, 100, 100)
+        self.time_left = 5
+
+    def effect(self, level):
+        level.player.speed += 3
+
+    def remove_effect(self, level):
+        level.player.speed -= 3
+
+class BulletChaining(Buff):
+    def __init__(self, level, x, y):
+        super().__init__(level, x, y)
+        self.colour = (0, 255, 255)
+
+    def effect(self, level):
+        level.player.bullet_chain += 1
