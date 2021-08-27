@@ -67,8 +67,8 @@ class Menu:
                                                difficulty_text.get_height() + 20)
         self.window.blit(difficulty_text, (
             (Menu.width // 2 - difficulty_text.get_width() // 2), (Menu.height // 2 - difficulty_text.get_height())))
-        self.create_arrow(1, (Menu.width // 2, Menu.height // 2))
-        self.create_arrow(-1, (Menu.width // 2, Menu.height // 2 + 40))
+        self.create_arrow(1, (Menu.width // 2 - arrow.width // 2, Menu.height // 2))
+        self.create_arrow(-1, (Menu.width // 2 - arrow.width // 2, Menu.height // 2 + 40))
         self.create_start_button()
         self.create_exit_button()
         pygame.display.update()
