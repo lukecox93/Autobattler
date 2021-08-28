@@ -58,6 +58,8 @@ class MultiEnemy(Enemy):
             self.speed = self.original_speed * self.bounciness
             level.player.colour = RED
             level.player.collided = 1
+            if len(self.bodies) == 0:
+                enemies.remove(self)
             return level.player.check_hp()
 
     def bullet_collision(self, level, bullet):

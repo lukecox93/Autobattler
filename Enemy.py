@@ -42,7 +42,6 @@ class Enemy:
     def player_collision(self, level, enemies):
         level.player.hp -= self.damage
         self.hp -= level.player.body_damage
-
         if self.hp <= 0:
             enemies.remove(self)
         else:
