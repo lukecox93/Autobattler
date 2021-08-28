@@ -28,7 +28,7 @@ class Level:
         self.spawn_drop = pygame.USEREVENT + 5
         self.spawn_multi_enemy = pygame.USEREVENT + 6
         self.player = player
-        self.window = pygame.display.set_mode((Level.width, Level.height))
+        self.window = pygame.display.set_mode((Level.width, Level.height), pygame.FULLSCREEN)
         self.fps = 60
         self.enemies = []
         self.bullets = []
