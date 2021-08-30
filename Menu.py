@@ -14,6 +14,7 @@ class Menu:
     width = 1920
     height = 1080
 
+
     def __init__(self):
         self.window = pygame.display.set_mode((Menu.width, Menu.height), pygame. FULLSCREEN)
         self.difficulty_level = 1
