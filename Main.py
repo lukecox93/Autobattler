@@ -46,11 +46,7 @@ def main():
                     level_1.player.shoot(level_1)
             level_1.draw_game()
             level_1.player.player_collided()
-            if menu_1.control_type == "Keyboard":
-                keys_pressed = pygame.key.get_pressed()
-                player.keyboard_move(keys_pressed, level_1)
-            else:
-                player.mouse_move(level_1)
+            level_1.player.move(pygame.key.get_pressed(), level_1, menu_1.control_type)
             level_1.bullet_collision()
             level_1.buff_collision()
             level_1.buff_handler()
