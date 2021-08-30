@@ -18,8 +18,9 @@ def main():
     pygame.init()
     info = pygame.display.Info()
     screen_width, screen_height = info.current_w, info.current_h
-    Level.width, Level.height = screen_width, screen_height
     Menu.width, Menu.height = screen_width, screen_height
+    Level.width, Level.height = Menu.width, Menu.height
+
     # TODO - change things to be sized relatively to the size of the screen.
     if not os.path.isfile("High score.txt"):
         with open("High score.txt", "w") as file:
