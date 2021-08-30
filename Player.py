@@ -30,18 +30,41 @@ class Player:
         self.score = 0
         self.colour = Player.colour
         self.bullet_chain = 0
+        self.move_target = None
+        self.delta_x = None
+        self.delta_y = None
 
-    def move(self, keys_pressed, level):
-        if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed > 0:
+    def keyboard_move(self, keys_pressed, level):
+        if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed >= 0:
             pygame.Rect.move_ip(self.rect, -self.speed, 0)
         if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and self.rect[0] + self.speed + self.rect[
-                2] < level.width:
+                2] <= level.width:
             pygame.Rect.move_ip(self.rect, self.speed, 0)
-        if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and self.rect[1] - self.speed > 0:
+        if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and self.rect[1] - self.speed >= 0:
             pygame.Rect.move_ip(self.rect, 0, -self.speed)
         if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and self.rect[1] + self.speed + self.rect[
-                3] < level.height:
+                3] <= level.height:
             pygame.Rect.move_ip(self.rect, 0, self.speed)
+        #TODO - add toggle to change between wasd and arrow keys, and update this method to reflect that
+
+    def mouse_move(self, level):
+        pygame.event.set_grab(True)
+        self.movement_targeting()
+        if self.rect[0] + self.delta_x <= 0 or self.rect[0] + self.delta_x + self.rect[2] >= level.width:
+            self.delta_x = 0
+        if self.rect[1] + self.delta_y <= 0 or self.rect[1] + self.delta_y + self.rect[3] >= level.height:
+            self.delta_y = 0
+        pygame.Rect.move_ip(self.rect, self.delta_x, self.delta_y)
+
+    def movement_targeting(self):
+        self.move_target = pygame.Rect(pygame.mouse.get_pos(), (1, 1))
+        x_dist = ((self.move_target[0] + (self.move_target[2] // 2)) - (self.rect[0] + (self.rect[2] // 2)))
+        y_dist = ((self.move_target[1] + (self.move_target[3] // 2)) - (self.rect[1] + (self.rect[2] // 2)))
+        if max(abs(x_dist), abs(y_dist)) == 0:
+            self.delta_x, self.delta_y = 0, 0
+        else:
+            self.delta_x = round((x_dist * self.speed) / (max(abs(x_dist), abs(y_dist))))
+            self.delta_y = round((y_dist * self.speed) / (max(abs(x_dist), abs(y_dist))))
 
     def draw_health_bar(self, level):
         health_rect = (self.rect[0], self.rect[1] - 10, self.rect[2] * (self.hp / self.max_hp), 5)

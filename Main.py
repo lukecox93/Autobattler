@@ -31,6 +31,8 @@ def main():
     while True:
         while menu_1.run:
             clock.tick(fps)
+            if len(menu_1.buttons) <= 0:
+                menu_1.create_menu_objects()
             menu_1.draw_menu()
             menu_1.event_handler()
         player = Player(Level.width // 2 - 25, Level.height // 2 - 25, 50, 50, 5, 1, 10)
@@ -44,16 +46,19 @@ def main():
                     level_1.player.shoot(level_1)
             level_1.draw_game()
             level_1.player.player_collided()
-            keys_pressed = pygame.key.get_pressed()
-            player.move(keys_pressed, level_1)
+            if menu_1.control_type == "Keyboard":
+                keys_pressed = pygame.key.get_pressed()
+                player.keyboard_move(keys_pressed, level_1)
+            else:
+                player.mouse_move(level_1)
             level_1.bullet_collision()
             level_1.buff_collision()
             level_1.buff_handler()
             if level_1.player_enemy_collision():
                 game_over = GameOver(level_1)
                 while game_over.run:
-                    game_over.event_handler()
                     game_over.draw()
+                    game_over.event_handler()
                 main()
             level_1.player.check_level_up()
 

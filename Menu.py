@@ -23,6 +23,7 @@ class Menu:
         self.run = True
         self.buttons = []
         self.gap = 2
+        self.control_type = "Keyboard"
 
     def create_arrow(self, effect, position, orientation):
         button = Arrow(effect, position, self, orientation)
@@ -34,6 +35,10 @@ class Menu:
 
     def create_exit_button(self):
         button = ExitButton(self)
+        self.buttons.append(button)
+
+    def create_controls_button(self):
+        button = ControlsButton(self)
         self.buttons.append(button)
 
     def event_handler(self):
@@ -59,13 +64,14 @@ class Menu:
     def create_menu_objects(self):
         self.difficulty_text = MAIN_FONT.render("Difficulty: " + str(self.difficulty_level), True, BLACK)
         self.difficulty_rect = pygame.rect.Rect(Menu.width // 2 - ((self.difficulty_text.get_width() + Arrow.width + self.gap) // 2), Menu.height // 2, self.difficulty_text.get_width() + Arrow.width + self.gap, self.difficulty_text.get_height())
-        self.create_arrow(1, (self.difficulty_rect[0] + self.difficulty_text.get_width() + self.gap, self.difficulty_rect[1]), False)
-        self.create_arrow(-1, (self.difficulty_rect[0] + self.difficulty_text.get_width() + self.gap, self.difficulty_rect[1] + self.gap + Arrow.height), True)
         self.create_start_button()
         self.create_exit_button()
+        self.create_controls_button()
+        self.create_arrow(1, (self.difficulty_rect[0] + self.difficulty_text.get_width() + self.gap, self.difficulty_rect[1]), False)
+        self.create_arrow(-1, (self.difficulty_rect[0] + self.difficulty_text.get_width() + self.gap, self.difficulty_rect[1] + self.gap + Arrow.height), True)
+
 
     def draw_menu(self):
-        self.create_menu_objects()
         self.window.fill(WHITE)
         self.window.blit(self.difficulty_text, (self.difficulty_rect[0], self.difficulty_rect[1]))
         for button in self.buttons:
@@ -93,7 +99,7 @@ class Arrow:
 class StartButton:
     def __init__(self, screen):
         self.text = MAIN_FONT.render("Start Game", True, BLACK)
-        self.rect = (screen.width // 2 - self.text.get_width() // 2, screen.height // 2 - self.text.get_height() + 120, self.text.get_width(), self.text.get_height())
+        self.rect = pygame.rect.Rect(screen.width // 2 - self.text.get_width() // 2, screen.height // 2 - self.text.get_height() + 120, self.text.get_width(), self.text.get_height())
         self.screen = screen
 
     def draw(self):
@@ -113,7 +119,25 @@ class ExitButton:
 
     def draw(self):
         pygame.draw.rect(self.screen.window, RED, self.rect)
-        self.screen.window.blit(self.text, (self.rect))
+        self.screen.window.blit(self.text, self.rect)
 
     def event(self):
         sys.exit()
+
+class ControlsButton:
+    def __init__(self, screen):
+        self.text = MAIN_FONT.render("Control type: " + str(screen.control_type), True, BLACK)
+        self.screen = screen
+        self.rect = pygame.rect.Rect((screen.width - self.text.get_width()) // 2, screen.buttons[0].rect[1] + self.text.get_height() + self.screen.gap, self.text.get_width(), self.text.get_height())
+
+    def draw(self):
+        pygame.draw.rect(self.screen.window, RED, self.rect)
+        self.screen.window.blit(self.text, self.rect)
+
+    def event(self):
+        if self.screen.control_type == "Keyboard":
+            self.screen.control_type = "Mouse"
+        else:
+            self.screen.control_type = "Keyboard"
+        self.screen.create_controls_button()
+        self.screen.buttons.remove(self)
