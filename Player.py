@@ -34,18 +34,33 @@ class Player:
         self.delta_x = None
         self.delta_y = None
 
-    def keyboard_move(self, keys_pressed, level):
-        if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and self.rect[0] - self.speed >= 0:
+    def move(self, keys_pressed, level, control_type):
+        if control_type == 0:
+            self.wasd_move(keys_pressed, level)
+        elif control_type == 1:
+            self.arrow_key_move(keys_pressed, level)
+        else:
+            self.mouse_move(level)
+
+    def wasd_move(self, keys_pressed, level):
+        if keys_pressed[pygame.K_a] and self.rect[0] - self.speed >= 0:
             pygame.Rect.move_ip(self.rect, -self.speed, 0)
-        if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and self.rect[0] + self.speed + self.rect[
-                2] <= level.width:
+        if keys_pressed[pygame.K_d] and self.rect[0] + self.speed + self.rect[2] <= level.width:
             pygame.Rect.move_ip(self.rect, self.speed, 0)
-        if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and self.rect[1] - self.speed >= 0:
+        if keys_pressed[pygame.K_w] and self.rect[1] - self.speed >= 0:
             pygame.Rect.move_ip(self.rect, 0, -self.speed)
-        if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and self.rect[1] + self.speed + self.rect[
-                3] <= level.height:
+        if keys_pressed[pygame.K_s] and self.rect[1] + self.speed + self.rect[3] <= level.height:
             pygame.Rect.move_ip(self.rect, 0, self.speed)
-        #TODO - add toggle to change between wasd and arrow keys, and update this method to reflect that
+
+    def arrow_key_move(self, keys_pressed, level):
+        if keys_pressed[pygame.K_LEFT] and self.rect[0] - self.speed >= 0:
+            pygame.Rect.move_ip(self.rect, -self.speed, 0)
+        if keys_pressed[pygame.K_RIGHT] and self.rect[0] + self.speed + self.rect[2] <= level.width:
+            pygame.Rect.move_ip(self.rect, self.speed, 0)
+        if keys_pressed[pygame.K_UP] and self.rect[1] - self.speed >= 0:
+            pygame.Rect.move_ip(self.rect, 0, -self.speed)
+        if keys_pressed[pygame.K_DOWN] and self.rect[1] + self.speed + self.rect[3] <= level.height:
+            pygame.Rect.move_ip(self.rect, 0, self.speed)
 
     def mouse_move(self, level):
         pygame.event.set_grab(True)
