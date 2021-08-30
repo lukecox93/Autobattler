@@ -128,6 +128,7 @@ class ExitButton:
 class ControlsButton:
     def __init__(self, screen):
         self.text = MAIN_FONT.render("Control type: " + str(screen.control_types[screen.control_type]), True, BLACK)
+        # TODO - make it so that the program remembers the previous selection for control type
         self.screen = screen
         self.rect = pygame.rect.Rect((screen.width - self.text.get_width()) // 2, screen.buttons[0].rect[1] + self.text.get_height() + self.screen.gap, self.text.get_width(), self.text.get_height())
 

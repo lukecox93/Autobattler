@@ -70,6 +70,7 @@ class Player:
         if self.rect[1] + self.delta_y <= 0 or self.rect[1] + self.delta_y + self.rect[3] >= level.height:
             self.delta_y = 0
         pygame.Rect.move_ip(self.rect, self.delta_x, self.delta_y)
+        # TODO - stop the player from shaking when on top of the mouse.
 
     def movement_targeting(self):
         self.move_target = pygame.Rect(pygame.mouse.get_pos(), (1, 1))

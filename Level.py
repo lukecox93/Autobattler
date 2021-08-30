@@ -58,8 +58,8 @@ class Level:
 
     def events(self):
         pygame.time.set_timer(self.spawn_basic_enemy, 1000 // self.enemy_spawn_rate)
-        pygame.time.set_timer(self.spawn_big_enemy, 1000 // self.enemy_spawn_rate)
-        pygame.time.set_timer(self.spawn_multi_enemy, 1000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_big_enemy, 5000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_multi_enemy, 2000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
         pygame.time.set_timer(self.increase_score, 1000)
         pygame.time.set_timer(self.spawn_drop, 5000)
