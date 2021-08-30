@@ -1,5 +1,4 @@
 import pygame
-import random
 
 GREEN = (0, 255, 0)
 
@@ -47,7 +46,6 @@ class AttackDamageBuff(Buff):
 
     def effect(self, level):
         level.player.bullet_damage += 1
-        # TODO - doesn't seem to have an effect
 
 
 class TempAttackSpeedBuff(Buff):

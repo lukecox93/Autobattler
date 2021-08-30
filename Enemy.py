@@ -1,8 +1,6 @@
-import random
 import pygame
 
 RED = (255, 0, 0)
-
 
 class Enemy:
     def __init__(self, level, x, y):
@@ -19,9 +17,10 @@ class Enemy:
         self.original_speed = 0
         self.speed = 0
         self.given_xp = 0
+        self.colour = RED
 
     def draw(self, level):
-        pygame.draw.rect(level.window, RED, self.rect)
+        pygame.draw.rect(level.window, self.colour, self.rect)
         level.targeting(self)
         self.move(level)
 

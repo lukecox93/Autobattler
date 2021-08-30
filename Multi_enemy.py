@@ -31,7 +31,7 @@ class MultiEnemy(Enemy):
     def draw(self, level):
         level.targeting(self)
         for body in self.bodies:
-            pygame.draw.rect(level.window, RED, body.rect)
+            pygame.draw.rect(level.window, self.colour, body.rect)
         self.move(level)
 
     def move(self, level):

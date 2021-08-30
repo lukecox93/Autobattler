@@ -1,5 +1,6 @@
 import math
 import sys
+import random
 from Basic_enemy import BasicEnemy
 from Big_enemy import BigEnemy
 from Multi_enemy import MultiEnemy
@@ -56,8 +57,8 @@ class Level:
         pygame.display.update()
 
     def events(self):
-        pygame.time.set_timer(self.spawn_basic_enemy, 000 // self.enemy_spawn_rate)
-        pygame.time.set_timer(self.spawn_big_enemy, 000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_basic_enemy, 1000 // self.enemy_spawn_rate)
+        pygame.time.set_timer(self.spawn_big_enemy, 1000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.spawn_multi_enemy, 1000 // self.enemy_spawn_rate)
         pygame.time.set_timer(self.increase_spawn_rate, 2000)
         pygame.time.set_timer(self.increase_score, 1000)
