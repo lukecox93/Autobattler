@@ -22,6 +22,11 @@ class GameOver:
         self.game_over_rect = None
         self.exit_rect = None
 
+    def start(self):
+        while self.run:
+            self.draw()
+            self.event_handler()
+
     def get_high_score(self):
         with open("High score.txt", "r") as file:
             high_score = int(file.read())
@@ -79,6 +84,9 @@ class GameOver:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
                     self.run = False
+                    self.level.menu.current_game = False
+                    self.level.menu.run = True
+                    self.level.menu.start()
             elif pygame.Rect.collidepoint(self.exit_rect, pygame.mouse.get_pos()):
                 pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
                 if event.type == pygame.MOUSEBUTTONDOWN:

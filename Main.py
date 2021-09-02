@@ -25,38 +25,13 @@ def main():
     if not os.path.isfile("High score.txt"):
         with open("High score.txt", "w") as file:
             file.write("0")
-    clock = pygame.time.Clock()
     menu_1 = Menu()
-    fps = 60
     while True:
-        while menu_1.run:
-            clock.tick(fps)
-            if len(menu_1.buttons) <= 0:
-                menu_1.create_menu_objects()
-            menu_1.draw_menu()
-            menu_1.event_handler()
-        player = Player(Level.width // 2 - 25, Level.height // 2 - 25, 50, 50, 5, 1, 10)
-        level_1 = Level(player, menu_1)
-        level_1.events()
-        while level_1.run:
-            clock.tick(level_1.fps)
-            level_1.event_handler()
-            if player.bullet_cooldown():
-                if level_1.target_finder(level_1.player, level_1.enemies) >= 1:
-                    level_1.player.shoot(level_1)
-            level_1.draw_game()
-            level_1.player.player_collided()
-            level_1.player.move(pygame.key.get_pressed(), level_1, Menu.control_type)
-            level_1.bullet_collision()
-            level_1.buff_collision()
-            level_1.buff_handler()
-            if level_1.player_enemy_collision():
-                game_over = GameOver(level_1)
-                while game_over.run:
-                    game_over.draw()
-                    game_over.event_handler()
-                main()
-            level_1.player.check_level_up()
+        menu_1.start()
+        if not menu_1.carry_on:
+            player = Player(Level.width // 2 - 25, Level.height // 2 - 25, 50, 50, 5, 1, 10)
+            level_1 = Level(player, menu_1)
+            level_1.start()
 
 
 if __name__ == "__main__":

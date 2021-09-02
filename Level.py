@@ -5,6 +5,7 @@ from Basic_enemy import BasicEnemy
 from Big_enemy import BigEnemy
 from Multi_enemy import MultiEnemy
 from Buffs import *
+from Game_Over import GameOver
 
 pygame.font.init()
 
@@ -30,7 +31,8 @@ class Level:
         self.spawn_multi_enemy = pygame.USEREVENT + 6
         self.player = player
         self.window = pygame.display.set_mode((Level.width, Level.height), pygame.FULLSCREEN)
-        self.fps = 60
+        self.fps = menu.FPS_choices[menu.fps]
+        # TODO - change speeds so they are calculated according to the fps
         self.enemies = []
         self.bullets = []
         self.targets = []
@@ -39,9 +41,31 @@ class Level:
         self.available_buffs = (HealthPack, AttackSpeedBuff, AttackDamageBuff, TempAttackSpeedBuff, TempAttackDamageBuff, MoveSpeedBuff, TempMoveSpeedBuff, BulletChaining)
         self.run = True
         self.enemy_spawn_rate = 1
-        self.gameover = False
         self.menu = menu
         self.modifier = menu.difficulty_level
+        self.clock = menu.clock
+
+    def start(self):
+        self.events()
+        while self.run:
+            self.clock.tick(self.fps)
+            self.event_handler()
+            if self.player.bullet_cooldown():
+                if self.target_finder(self.player, self.enemies) >= 1:
+                    self.player.shoot(self)
+            self.draw_game()
+            self.player.player_collided()
+            self.player.move(pygame.key.get_pressed(), self, self.menu.control_type)
+            self.bullet_collision()
+            self.buff_collision()
+            self.buff_handler()
+            self.player.check_level_up()
+            if self.player_enemy_collision():
+                self.pause_events()
+                self.run = False
+                game_over = GameOver(self)
+                game_over.start()
+
 
     def draw_game(self):
         self.window.fill(WHITE)
@@ -81,8 +105,12 @@ class Level:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.pause_events()
-                    self.run = False
                     self.menu.run = True
+                    self.menu.start()
+                    if self.menu.carry_on:
+                        self.start()
+                    else:
+                        self.run = False
             if event.type == pygame.USEREVENT + 1:
                 enemy = self.spawn(BasicEnemy)
                 self.enemies.append(enemy)
