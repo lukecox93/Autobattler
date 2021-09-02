@@ -46,7 +46,7 @@ def main():
                     level_1.player.shoot(level_1)
             level_1.draw_game()
             level_1.player.player_collided()
-            level_1.player.move(pygame.key.get_pressed(), level_1, menu_1.control_type)
+            level_1.player.move(pygame.key.get_pressed(), level_1, Menu.control_type)
             level_1.bullet_collision()
             level_1.buff_collision()
             level_1.buff_handler()

@@ -13,6 +13,7 @@ MAIN_FONT = pygame.font.SysFont("Verdana", 30)
 class Menu:
     width = 1920
     height = 1080
+    control_type =0
 
 
     def __init__(self):
@@ -127,8 +128,7 @@ class ExitButton:
 
 class ControlsButton:
     def __init__(self, screen):
-        self.text = MAIN_FONT.render("Control type: " + str(screen.control_types[screen.control_type]), True, BLACK)
-        # TODO - make it so that the program remembers the previous selection for control type
+        self.text = MAIN_FONT.render("Control type: " + str(screen.control_types[Menu.control_type]), True, BLACK)
         self.screen = screen
         self.rect = pygame.rect.Rect((screen.width - self.text.get_width()) // 2, screen.buttons[0].rect[1] + self.text.get_height() + self.screen.gap, self.text.get_width(), self.text.get_height())
 
@@ -137,7 +137,7 @@ class ControlsButton:
         self.screen.window.blit(self.text, self.rect)
 
     def event(self):
-        self.screen.control_type += 1
-        self.screen.control_type %= 3
+        Menu.control_type += 1
+        Menu.control_type %= 3
         self.screen.create_controls_button()
         self.screen.buttons.remove(self)
