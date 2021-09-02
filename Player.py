@@ -76,7 +76,7 @@ class Player:
         self.move_target = pygame.Rect(pygame.mouse.get_pos(), (1, 1))
         x_dist = ((self.move_target[0] + (self.move_target[2] // 2)) - (self.rect[0] + (self.rect[2] // 2)))
         y_dist = ((self.move_target[1] + (self.move_target[3] // 2)) - (self.rect[1] + (self.rect[2] // 2)))
-        if max(abs(x_dist), abs(y_dist)) == 0:
+        if max(abs(x_dist), abs(y_dist)) <= self.speed:
             self.delta_x, self.delta_y = 0, 0
         else:
             self.delta_x = round((x_dist * self.speed) / (max(abs(x_dist), abs(y_dist))))
