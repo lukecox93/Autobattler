@@ -10,6 +10,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 
+# TODO - add score overall - damage dealt, damage taken, enemies killed etc.
 
 class GameOver:
 
