@@ -56,6 +56,7 @@ class Level:
             self.draw_game()
             self.player.player_collided()
             self.player.move(pygame.key.get_pressed(), self, self.menu.control_type)
+            print(self.menu.control_type)
             self.bullet_collision()
             self.buff_collision()
             self.buff_handler()

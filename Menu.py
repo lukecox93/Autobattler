@@ -165,6 +165,7 @@ class ControlsButton:
     def event(self):
         Menu.control_type += 1
         Menu.control_type %= 3
+        self.screen.control_type = Menu.control_type
         self.screen.create_button(ControlsButton)
         self.screen.buttons.remove(self)
 
