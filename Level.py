@@ -44,6 +44,8 @@ class Level:
         self.menu = menu
         self.modifier = menu.difficulty_level
         self.clock = menu.clock
+        self.damage_dealt = 0
+        self.damage_taken = 0
 
     def start(self):
         self.events()
@@ -56,7 +58,6 @@ class Level:
             self.draw_game()
             self.player.player_collided()
             self.player.move(pygame.key.get_pressed(), self, self.menu.control_type)
-            print(self.menu.control_type)
             self.bullet_collision()
             self.buff_collision()
             self.buff_handler()

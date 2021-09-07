@@ -47,14 +47,22 @@ class GameOver:
         self.create_rects()
         self.window.fill(RED)
         self.display_high_score()
+        self.display_stats()
         self.window.blit(game_over_text, (
             (self.level.width // 2 - game_over_text.get_width() // 2),
-            (self.level.height // 2 - game_over_text.get_height())))
+            (self.level.height // 2 - game_over_text.get_height() * 3)))
         pygame.draw.rect(self.window, WHITE, self.game_over_rect)
         pygame.draw.rect(self.window, WHITE, self.exit_rect)
         self.window.blit(self.new_game_text, (self.game_over_rect[0] + 10, self.game_over_rect[1] + 10))
         self.window.blit(self.exit_text, (self.exit_rect[0] + 10, self.exit_rect[1] + 10))
         pygame.display.update()
+
+    def display_stats(self):
+        damage_dealt_text = MAIN_FONT.render("You dealt " + str(self.level.damage_dealt) + " damage", True, BLACK)
+        damage_taken_text = MAIN_FONT.render("You took " + str(self.level.damage_taken) + " damage", True, BLACK)
+        self.window.blit(damage_dealt_text, (self.level.width // 2 - damage_dealt_text.get_width() // 2, (self.level.height // 2) - damage_dealt_text.get_height() * 2))
+        self.window.blit(damage_taken_text, (self.level.width // 2 - damage_taken_text.get_width() // 2, (self.level.height // 2) - damage_taken_text.get_height()))
+
 
     def display_high_score(self):
         score_text = MAIN_FONT.render("You lasted " + str(self.level.player.score) + " seconds", True, BLACK)

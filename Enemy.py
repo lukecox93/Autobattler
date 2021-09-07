@@ -30,16 +30,15 @@ class Enemy:
             self.enemy_collision(level, -self.delta_x, -self.delta_y)
             self.bounce += 1
             if self.bounce >= 10:
-                print(self.speed)
                 self.bounce = 0
                 self.speed = self.original_speed
-                print(self.speed)
         else:
             pygame.Rect.move_ip(self.rect, self.delta_x, self.delta_y)
             self.enemy_collision(level, self.delta_x, self.delta_y)
 
     def player_collision(self, level, enemies):
         level.player.hp -= self.damage
+        level.damage_taken += self.damage
         self.hp -= level.player.body_damage
         if self.hp <= 0:
             enemies.remove(self)
@@ -49,6 +48,7 @@ class Enemy:
 
     def bullet_collision(self, level, bullet):
         self.hp -= bullet.damage
+        level.damage_dealt += bullet.damage
         if self.hp <= 0:
             self.killed(level, self)
         bullet.collision(level)
